@@ -1,0 +1,99 @@
+/* src/components/InfiniteImageScroll.css */
+
+* {
+	box-sizing: border-box;
+}
+
+/* Remove global body styles - apply them in layout.jsx or globals.css */
+/*
+body {
+  font-family: Mori;
+  background: #111;
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+}
+*/
+
+.gallery {
+	position: relative; /* Changed for correct pinning flow */
+	width: 100%;
+	height: 100vh; /* Determines the pinned viewport height */
+	overflow: hidden;
+    background: #111; /* Apply background here */
+    font-family: 'Mori', sans-serif; /* Apply font here or inherit */
+}
+
+.cards {
+	position: absolute;
+	width: 24rem;
+	height: 8rem;
+	top: 20%; /* Adjusted for better vertical centering */
+	left: 50%;
+	transform: translate(-50%, -50%);
+    padding: 0;
+    margin: 0; /* Reset list defaults */
+}
+
+.cards li {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	width: 24rem;
+	height: 28rem;
+	text-align: center;
+	/* line-height: 18rem; / / Better to use flex/grid for centering content */
+    display: flex; /* Use flexbox to center content */
+    align-items: center;
+    justify-content: center;
+	font-size: 2rem;
+    font-weight: bold;
+    color: white;
+	background-color: #9d7cce; /* Original color */
+    /* background-color: #4a4a6a; Darker purple from image */
+	position: absolute;
+	top: 0;
+	left: 0;
+	border-radius: 0.8rem;
+    opacity: 0; /* Start hidden for GSAP */
+    will-change: transform, opacity; /* Hint browser for performance */
+}
+
+/* Example of slightly different colors like the image */
+.cards li:nth-child(odd) {
+     /* background-color: #6a6a8a; / / Slightly different shade */
+}
+
+
+.actions {
+	position: absolute;
+	bottom: 8vh; /* Position relative to gallery height */
+	left: 50%;
+	transform: translateX(-50%);
+    z-index: 200; /* Ensure buttons are on top */
+}
+
+/* Button Styles (Keep as provided, maybe adjust margin) */
+button {
+  display:inline-block;
+  outline: none;
+  border: none;
+  /* ... other button styles ... */
+  margin: 0 10px; /* Add space between buttons */
+  padding: 12px 25px;
+  /* font-family: Mori; / / Inherit */
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 20px;
+  /* ... rest of button styles ... */
+}
+
+button:hover {
+ /* ... button hover styles ... */
+}
+
+/* Link styles (remove if not needed) */
+/*
+a { ... }
+a:hover { ... }
+*/

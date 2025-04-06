@@ -1,0 +1,481 @@
+/* MyNFTs.css */
+
+/* --- Import Fonts (Example: Poppins) --- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+/* Add Orbitron or another blocky font if desired for titles */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+:root {
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --text: #e0e0e0; /* Lighter text */
+  --text-secondary: #a0a0b0; /* Adjusted secondary text */
+  --bg: rgba(15, 20, 30, 0.85);
+  --card-bg: rgba(30, 35, 50, 0.7);
+  --profile-header-bg: rgba(30, 30, 46, 0.8); /* Specific background for header */
+  --pill-background: #2a2a3a; /* Background for value pills */
+  --color-success: #34d399; /* Green for balance */
+
+  --font-main: 'Poppins', sans-serif;
+  --font-title: 'Orbitron', sans-serif; /* Use Orbitron for titles */
+
+   /* Skeleton loader colors */
+  --skeleton-bg: rgba(55, 65, 81, 0.5);
+  --skeleton-highlight: rgba(75, 85, 99, 0.5);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-main);
+  color: var(--text);
+  background-color: #0d0517; /* Match previous dark background */
+  line-height: 1.6;
+}
+
+.profile-page {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+.background-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2; /* Further back */
+  filter: brightness(0.6); /* Adjust brightness */
+}
+
+/* Optional Overlay */
+.video-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(13, 5, 23, 0.5); /* Dark purple overlay */
+  backdrop-filter: blur(3px);
+  z-index: -1; /* Above video, below content */
+}
+
+
+.content {
+  max-width: 1300px; /* Consistent max-width */
+  margin: 0 auto;
+  padding: 40px 20px; /* Consistent padding */
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Profile Header Styling --- */
+.profile-header {
+  background: var(--profile-header-bg);
+  backdrop-filter: blur(10px);
+  border-radius: 1rem;
+  padding: 25px 30px; /* Adjust padding */
+  margin-bottom: 3rem;
+  border: 1px solid rgba(0, 255, 255, 0.2); /* Subtle cyan border */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  /* --- Required for Spotlight --- */
+  position: relative;
+  overflow: hidden; /* Clip the spotlight gradient */
+}
+
+/* Header Title - Adjusted to match target image */
+.profile-header h1 {
+  font-family: var(--font-title); /* Orbitron or blocky font */
+  font-size: 2.5rem; /* Adjust size */
+  font-weight: 500;
+  color: #ADBBF6; /* Light Lavender/Blue */
+  margin-bottom: 30px;
+  /* Remove gradient text fill */
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+  text-shadow: none; /* Remove any text shadow */
+}
+
+.details {
+  display: flex; /* Use flex for better control */
+  flex-direction: column; /* Stack items vertically */
+  gap: 15px; /* Space between items */
+}
+
+/* Individual detail item (Address, Balance) */
+.details > div {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap; /* Allow wrapping */
+  gap: 10px; /* Space between label and value pill */
+  background: none; /* Remove item background */
+  padding: 0; /* Remove item padding */
+  border-radius: 0;
+}
+
+/* Label styling */
+.details span:first-child {
+  color: var(--text-secondary); /* Dimmer grey */
+  margin-bottom: 0; /* Remove bottom margin */
+  font-size: 1rem; /* Standard text size */
+  font-weight: 400;
+}
+
+/* Pill styling for values */
+.value-pill {
+  font-weight: 500;
+  background-color: var(--pill-background);
+  padding: 4px 10px;
+  border-radius: 6px;
+  display: inline-block;
+  line-height: 1.4;
+  word-break: break-all; /* Ensure long addresses break */
+}
+
+.value-pill.address {
+  font-family: monospace;
+  color: var(--text); /* Standard text color in pill */
+  letter-spacing: 0.5px;
+}
+
+.value-pill.balance {
+  font-family: var(--font-main); /* Use main font */
+  color: var(--color-success); /* Green text in pill */
+}
+
+
+/* --- NFT Section Styling (Keep consistent with previous) --- */
+.nft-section {
+  background: var(--bg);
+  backdrop-filter: blur(10px);
+  border-radius: 1rem;
+  padding: 2rem;
+  border: 1px solid rgba(0, 255, 255, 0.2); /* Match header border */
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.section-header h2 {
+  font-family: var(--font-title); /* Use title font */
+  font-size: 1.8rem;
+  color: var(--text);
+  /* Optional: Add subtle glow back if desired */
+  /* text-shadow: 0 0 8px rgba(255, 0, 255, 0.5); */
+}
+
+.filters {
+  display: flex;
+  gap: 10px; /* Slightly larger gap */
+  flex-wrap: wrap;
+}
+
+/* Filter buttons - adjusted for consistency */
+.filters button {
+  font-family: var(--font-title); /* Orbitron or similar */
+  background: rgba(0, 255, 255, 0.1);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  color: #00ffff; /* Cyan text */
+  padding: 8px 18px;
+  border-radius: 20px; /* Rounded pill shape */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filters button:hover {
+  background: rgba(0, 255, 255, 0.2);
+  border-color: #00ffff;
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+  color: #ffffff;
+}
+
+.filters button.active {
+  background: #00ffff; /* Cyan background */
+  color: #0d0517; /* Dark text */
+  border-color: #00ffff;
+  box-shadow: 0 0 10px #00ffff;
+  font-weight: 700;
+}
+
+/* --- NFT Grid and Card Styling (Keep consistent) --- */
+.nft-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 25px; /* Consistent gap */
+}
+
+.nft-card {
+  background: var(--card-bg);
+  border-radius: 12px; /* Consistent radius */
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+  border: 1px solid rgba(0, 255, 255, 0.2); /* Consistent border */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  backdrop-filter: blur(5px); /* Subtle blur on cards */
+}
+
+.nft-card:hover {
+  transform: translateY(-5px) scale(1.02); /* Add slight scale */
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+  border-color: #00ffff;
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  padding-top: 100%; /* 1:1 aspect ratio */
+  background: rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.image-container img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block; /* Ensure it's block */
+}
+
+/* Placeholder styling */
+.image-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex; /* Use flex to center content */
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.5);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  /* display: none; Let JS handle display */
+}
+
+
+.nft-info {
+  padding: 1rem;
+  flex-grow: 1; /* Allow info to fill space */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Push button/status down */
+}
+
+.nft-info h3 {
+  font-size: 1.1rem; /* Slightly larger */
+  font-weight: 500;
+  margin-bottom: 0.75rem; /* More space */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text);
+}
+
+.nft-info p { /* Base paragraph style */
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.nft-info p.listed-status { /* Specific style for listed price */
+    color: #ffd700; /* Gold/Yellow for listed price */
+    font-weight: 500;
+    text-align: right; /* Align to right */
+    margin-top: auto; /* Push to bottom */
+    padding-top: 0.5rem;
+}
+
+
+/* Button Styling */
+.nft-info button.list-button {
+  font-family: var(--font-title); /* Orbitron */
+  background: linear-gradient(90deg, #ff00ff, #00ffff); /* Magenta-Cyan gradient */
+  color: #000; /* Black text */
+  width: 100%;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px; /* Rounded corners */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 1rem; /* Space above */
+  display: inline-flex; /* For spinner alignment */
+  align-items: center;
+  justify-content: center;
+}
+
+.nft-info button.list-button:hover:not(:disabled) {
+  box-shadow: 0 0 15px #ff00ff, 0 0 15px #00ffff;
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.nft-info button.list-button:disabled {
+  background: #555;
+  color: #999;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Basic Spinner */
+.spinner {
+  display: inline-block;
+  border: 2px solid rgba(0, 0, 0, 0.3); /* Spinner color on button */
+  border-radius: 50%;
+  border-top-color: #000;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 8px; /* Space between spinner and text */
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+
+/* --- Loading Skeleton --- */
+.loading-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 25px;
+}
+
+.nft-card.skeleton {
+  background: var(--card-bg);
+  border: 1px solid rgba(0, 255, 255, 0.1); /* Match card border */
+  backdrop-filter: none; /* No blur on skeleton */
+}
+
+.skeleton .image-placeholder.skeleton-bg {
+    background-color: var(--skeleton-bg);
+    animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    display: block; /* Make sure it's visible */
+    padding-top: 100%; /* Maintain aspect ratio */
+    height: 0; /* Height controlled by padding-top */
+    width: 100%;
+}
+
+.skeleton .info-placeholder {
+  padding: 1rem;
+}
+
+.skeleton .skeleton-text {
+  height: 1rem;
+  margin-bottom: 0.75rem;
+  border-radius: 4px;
+  background-color: var(--skeleton-bg);
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.skeleton .skeleton-text.short {
+  width: 60%;
+  height: 0.8rem;
+  margin-bottom: 0;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+
+/* Error/Empty Message */
+.error-message, .empty-message {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-secondary);
+  background: var(--card-bg); /* Use card background */
+  border-radius: 1rem; /* Match section radius */
+  margin-top: 1.5rem;
+  border: 1px solid rgba(0, 255, 255, 0.1); /* Match card border */
+  font-size: 1.1rem;
+}
+.error-message {
+    color: #f87171; /* Red for errors */
+    border-color: rgba(248, 113, 113, 0.3);
+}
+
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+  .content {
+    padding: 30px 15px; /* Consistent padding */
+  }
+
+  .profile-header {
+    padding: 20px; /* Adjust padding */
+  }
+
+  .profile-header h1 {
+    font-size: 2rem; /* Adjust title size */
+  }
+
+  .section-header h2 {
+      font-size: 1.6rem;
+  }
+
+  .nft-grid, .loading-grid { /* Apply to loading grid too */
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+  }
+
+  /* Stack section header on smaller screens */
+  .section-header {
+      flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+  }
+  .filters {
+      justify-content: center; /* Center filters */
+  }
+}
+
+@media (max-width: 480px) {
+   .content { padding: 20px 10px; }
+   .profile-header h1 { font-size: 1.8rem; }
+   .section-header h2 { font-size: 1.4rem; }
+
+  .nft-grid, .loading-grid {
+    grid-template-columns: 1fr; /* Single column */
+    gap: 15px;
+  }
+
+  /* Stack detail items */
+  .details > div {
+    /* flex-direction: column; */ /* Already column via parent */
+    /* align-items: flex-start; */ /* Align items left */
+  }
+  .filters button {
+      font-size: 0.8rem;
+      padding: 6px 12px;
+  }
+  .nft-info h3 { font-size: 1rem; }
+  .nft-info button.list-button { font-size: 0.9rem; }
+}

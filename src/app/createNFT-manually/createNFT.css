@@ -1,0 +1,390 @@
+/* ./createNFT.css - Adapted Dark Futuristic Theme */
+
+/* --- Font Import (Ensure this is linked, e.g., in layout.jsx or via <link> tag) --- */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap');
+
+/* --- Base & Theme --- */
+body {
+  /* Dark futuristic background */
+  background: linear-gradient(135deg, #1a0a2e 0%, #0d0517 100%);
+  color: #e0e0e0; /* Light gray default text */
+  font-family: 'Roboto', sans-serif; /* Default body font */
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+.create-container {
+  min-height: 100vh;
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Align content wrapper to top */
+  /* Add backdrop-filter support if needed, maybe on content-wrapper */
+}
+
+.content-wrapper {
+  width: 100%;
+  max-width: 950px; /* Allow slightly more width */
+  position: relative;
+  z-index: 10;
+  /* Semi-transparent background with cyan border */
+  background-color: rgba(20, 10, 40, 0.7); /* Darker purple tint */
+  border: 1px solid rgba(0, 255, 255, 0.4); /* Cyan border */
+  border-radius: 12px;
+  padding: 30px 40px;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.15); /* Cyan glow */
+  backdrop-filter: blur(8px); /* Frosted glass effect */
+  -webkit-backdrop-filter: blur(8px); /* Safari support */
+}
+
+/* --- Title --- */
+.create-title {
+  font-family: 'Orbitron', sans-serif; /* Futuristic font */
+  text-align: center;
+  font-size: 2.4rem;
+  font-weight: 700;
+  margin-bottom: 30px;
+  color: #ffffff; /* Bright white */
+  /* Removed text-shadow glow from battle page */
+  letter-spacing: 1px;
+}
+
+/* --- Connect Button --- */
+.connect-btn {
+  display: block;
+  margin: 0 auto 35px auto;
+  padding: 10px 25px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  background-color: transparent; /* Secondary style */
+  color: #00ffff; /* Cyan text */
+  border: 1px solid #00ffff; /* Cyan border */
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.connect-btn:hover:not(:disabled) {
+  background-color: rgba(0, 255, 255, 0.1); /* Light cyan glow on hover */
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+}
+
+.connect-btn:disabled {
+  color: #777;
+  border-color: #555;
+  background-color: rgba(85, 85, 85, 0.2);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* --- Layout Shift Styles (Form + Preview) --- */
+.form-preview-wrapper {
+  display: flex;
+  gap: 40px;
+  width: 100%;
+  transition: all 0.5s ease-in-out;
+}
+
+.form-section {
+  flex: 1 1 100%;
+  max-width: 100%;
+  transition: flex-basis 0.5s ease-in-out, max-width 0.5s ease-in-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-section {
+  flex: 0 0 0%; /* Initially hidden */
+  opacity: 0;
+  overflow: hidden;
+  transition: flex-basis 0.5s ease-in-out, opacity 0.5s ease-in-out 0.1s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* Distinct background for preview */
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 25px;
+  border-radius: 8px;
+  border: 1px dashed rgba(0, 255, 255, 0.5); /* Dashed cyan border */
+  min-height: 420px; /* Ensure minimum height */
+}
+
+/* When preview is active */
+.form-preview-wrapper.has-preview .form-section {
+  flex-basis: 55%;
+  max-width: 55%;
+}
+
+.form-preview-wrapper.has-preview .preview-section {
+  flex-basis: 45%;
+  opacity: 1;
+}
+
+/* --- Form Element Styling --- */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 25px;
+  flex-grow: 1; /* Push buttons down */
+}
+
+/* Shared input field style */
+.input-field {
+  background-color: rgba(0, 0, 0, 0.4); /* Darker transparent background */
+  border: 1px solid #4a4a6a; /* Darker purple/blue border */
+  border-radius: 6px;
+  padding: 14px 18px;
+  color: #e0e0e0; /* Light text */
+  font-size: 1rem;
+  font-family: 'Roboto', sans-serif;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  width: 100%; /* Ensure inputs take full width */
+  box-sizing: border-box; /* Include padding/border in width */
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #00ffff; /* Cyan border on focus */
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.5); /* Cyan glow on focus */
+}
+
+.input-field::placeholder {
+  color: #888; /* Slightly lighter placeholder */
+}
+
+.input-field:disabled {
+    background-color: rgba(50, 50, 50, 0.5);
+    color: #999;
+    cursor: not-allowed;
+    border-color: #444;
+}
+
+
+/* Specific field types if needed */
+.textarea-field {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.select-field {
+  appearance: none; /* Remove default arrow */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2300ffff' class='bi bi-chevron-down' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 16px;
+  padding-right: 40px; /* Space for custom arrow */
+}
+.select-field option {
+    background-color: #1a1a2e; /* Dark background for options */
+    color: #e0e0e0;
+}
+
+/* --- Custom File Input Label --- */
+.file-input-label {
+  display: flex; /* Use flex for spinner alignment */
+  align-items: center;
+  justify-content: center;
+  padding: 14px 18px;
+  background-color: rgba(0, 0, 0, 0.3);
+  color: #00ffff;
+  border: 1px dashed #00ffff; /* Dashed cyan */
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 1rem;
+  transition: background-color 0.3s ease, border-style 0.3s ease, color 0.3s ease;
+  min-height: 54px; /* Match height of other inputs roughly */
+  box-sizing: border-box;
+}
+
+.file-input-label:hover:not(.disabled) {
+  background-color: rgba(0, 255, 255, 0.1);
+  border-style: solid; /* Solid border on hover */
+}
+
+.file-input-label.disabled {
+    background-color: rgba(50, 50, 50, 0.5);
+    color: #777;
+    border-color: #555;
+    border-style: dashed;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Hide actual file input */
+.file-input {
+    /* Using 'hidden' attribute in JSX */
+    width: 1px; /* Ensure it takes no space */
+    height: 1px;
+    opacity: 0;
+    position: absolute;
+    z-index: -1;
+}
+
+/* --- Preview Section Styling --- */
+.preview-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 500;
+  margin-bottom: 20px;
+  color: #00ffff; /* Cyan title */
+  text-align: center;
+}
+
+.nft-preview {
+  width: 100%;
+  max-width: 320px;
+  max-height: 320px;
+  height: auto;
+  border-radius: 8px;
+  border: 2px solid rgba(0, 255, 255, 0.6); /* Cyan border for preview */
+  object-fit: contain;
+  background-color: rgba(0,0,0,0.3); /* Dark bg for transparent images */
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+}
+
+/* Placeholder shown when no image or during upload */
+.media-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 250px;
+    width: 90%;
+    max-width: 300px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px dashed #aaa;
+    color: #aaa;
+    text-align: center;
+    font-size: 0.9rem;
+    padding: 15px;
+}
+.media-loading .loading-spinner {
+    margin: 0 0 10px 0; /* Spinner above text */
+}
+
+
+/* --- Action Buttons --- */
+.btn {
+  font-family: 'Orbitron', sans-serif;
+  border: none;
+  border-radius: 8px;
+  padding: 16px 25px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  display: inline-flex; /* Changed to inline-flex for spinner */
+  align-items: center;
+  justify-content: center;
+  gap: 10px; /* Space between icon/spinner and text */
+  width: 100%; /* Make buttons full width */
+  margin-top: 10px; /* Space between buttons */
+  box-sizing: border-box;
+  min-height: 56px; /* Ensure consistent height */
+}
+.btn:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02); /* Subtle lift and grow */
+}
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.btn:active:not(:disabled) {
+    transform: translateY(0px) scale(1); /* Press effect */
+}
+
+/* Primary Button (Create/Mint) */
+.create-btn { /* Renamed from original for clarity, used on main action */
+  background: linear-gradient(90deg, #8A2BE2, #00BFFF); /* BlueViolet to DeepSkyBlue */
+  color: #ffffff; /* White text */
+}
+.create-btn:hover:not(:disabled) {
+  box-shadow: 0 0 15px rgba(138, 43, 226, 0.5), 0 0 15px rgba(0, 191, 255, 0.5);
+}
+.create-btn:disabled {
+   background: linear-gradient(90deg, #5d1d9a, #0080aa);
+}
+
+/* Secondary Button (AI) */
+.ai-btn { /* Style the 'create with ai' button */
+    background: transparent;
+    border: 1px solid #00ffff; /* Cyan border */
+    color: #00ffff; /* Cyan text */
+}
+.ai-btn:hover:not(:disabled) {
+    background: rgba(0, 255, 255, 0.1);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+}
+.ai-btn:disabled {
+  border-color: #555;
+  color: #777;
+  background: transparent;
+}
+
+/* --- Loading Spinner --- */
+.loading-spinner {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff; /* White spinning part */
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+  flex-shrink: 0; /* Prevent spinner from shrinking */
+}
+.small-spinner { /* For smaller contexts like file input label */
+    width: 16px;
+    height: 16px;
+    border-width: 3px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 850px) {
+  .content-wrapper {
+    padding: 25px 30px;
+  }
+  .form-preview-wrapper {
+    flex-direction: column;
+    gap: 30px;
+  }
+  .form-preview-wrapper .form-section,
+  .form-preview-wrapper.has-preview .form-section,
+  .form-preview-wrapper.has-preview .preview-section {
+    flex-basis: auto;
+    max-width: 100%;
+  }
+  .form-preview-wrapper.has-preview .preview-section {
+     opacity: 1;
+     min-height: 350px;
+  }
+  .nft-preview {
+    max-width: 90%;
+    max-height: 280px;
+  }
+  .create-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 500px) {
+   .create-container { padding: 20px 15px; }
+   .content-wrapper { padding: 20px; }
+   .create-title { font-size: 1.8rem; }
+   .input-field, .file-input-label { padding: 12px 15px; font-size: 0.9rem;}
+   .btn { padding: 14px 20px; font-size: 1rem; letter-spacing: 1px; }
+   .connect-btn { font-size: 0.9rem; padding: 8px 18px; }
+   .preview-title { font-size: 1.2rem;}
+   .media-placeholder { height: 200px; }
+   .nft-preview { max-height: 240px;}
+}

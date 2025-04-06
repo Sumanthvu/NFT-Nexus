@@ -1,0 +1,399 @@
+/* Improved: components/CreateNFT/CreateNFT.css */
+
+/* --- Base & Fonts --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'); /* Example: Using Inter */
+
+:root {
+    /* Define color palette */
+    --bg-primary: #000000;
+    --bg-card: rgba(20, 20, 25, 0.85); /* Darker, slightly more opaque card */
+    --bg-input: #2d2d3a; /* Dark input background */
+    --bg-input-focus: #353542;
+    --text-primary: #e1e3e6; /* Slightly off-white */
+    --text-secondary: #a0a7b4; /* Gray for subtitles/placeholders */
+    --text-placeholder: #717a8a;
+    --border-color: rgba(255, 255, 255, 0.1); /* Subtle border */
+    --border-input: rgba(128, 128, 128, 0.3); /* Input border */
+    --border-focus: #6366f1; /* Indigo-like focus */
+    --accent-primary: #4f46e5; /* Indigo */
+    --accent-secondary: #00aaff; /* Original AI btn blue */
+    --button-bg: #3a3a3a;
+    --button-hover-bg: #4f4f4f; /* Darker hover */
+    --button-action-bg: var(--accent-primary);
+    --button-action-hover-bg: #6366f1;
+    --shadow-color-light: rgba(99, 102, 241, 0.15); /* Lighter glow */
+    --shadow-color-dark: rgba(0, 0, 0, 0.4); /* Deeper shadow */
+
+    /* Define transitions */
+    --transition-fast: all 0.2s ease-in-out;
+    --transition-base: all 0.3s ease-in-out;
+    --transition-layout: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Smoother layout shift */
+
+    /* Define font */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    margin: 0; /* Ensure no default margin */
+    line-height: 1.6; /* Improve readability */
+}
+
+.create-container {
+    min-height: 100vh;
+    /* Add padding top = Navbar height if Navbar is sticky */
+    /* padding-top: 64px; */ /* Example: Adjust if you have a sticky navbar */
+    padding: 40px 20px;
+    box-sizing: border-box; /* Include padding in height calculation */
+    display: flex;
+    flex-direction: column; /* Keep user's setting */
+    justify-content: center; /* Keep user's setting */
+    align-items: center; /* Keep user's setting */
+    position: relative;
+    overflow: hidden;
+}
+
+.content-wrapper {
+    width: 100%;
+    max-width: 800px; /* Keep user's max-width */
+    /* REMOVED max-height: 400px; - Allows content to determine height */
+    position: relative;
+    z-index: 10;
+    background-color: var(--bg-card);
+    backdrop-filter: blur(10px); /* Add subtle blur */
+    padding: 35px 40px; /* Slightly more padding */
+    border-radius: 16px; /* More pronounced rounding */
+    border: 1px solid var(--border-color); /* Add subtle border */
+    box-shadow: 0 10px 30px var(--shadow-color-dark), 0 0 25px var(--shadow-color-light); /* Enhanced shadow */
+    transition: var(--transition-base); /* Add transition for potential future animations */
+}
+
+.create-title {
+    text-align: center;
+    font-size: 2.25rem; /* Slightly smaller */
+    font-weight: 700; /* Bolder */
+    margin-bottom: 25px;
+    color: var(--text-primary); /* Use variable */
+    /* Optional: Add a subtle gradient */
+    /* background-image: linear-gradient(to right, #a5b4fc, #e0c3fc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent; */
+    letter-spacing: -0.01em;
+}
+
+.connect-btn {
+    display: block;
+    margin: 0 auto 35px auto; /* Increased bottom margin */
+    padding: 12px 24px; /* More padding */
+    background-color: var(--button-bg);
+    color: white;
+    border: none;
+    border-radius: 10px; /* More rounded */
+    font-size: 0.95rem; /* Slightly adjusted size */
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast); /* Use variable */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.connect-btn:hover:not(:disabled) { /* Add :not(:disabled) */
+    background-color: var(--button-hover-bg);
+    transform: translateY(-1px); /* Subtle lift */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.connect-btn:focus-visible { /* Add focus state */
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+}
+
+.connect-btn:disabled { /* Style disabled state */
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #555; /* Keep specific disabled color */
+    box-shadow: none;
+}
+
+/* --- Layout Shift Styles --- */
+
+.form-preview-wrapper {
+    display: flex;
+    gap: 40px; /* Increased gap */
+    width: 100%;
+    /* Use smoother transition */
+    transition: var(--transition-layout);
+}
+
+.form-section {
+    flex: 1 1 100%;
+    max-width: 100%;
+    /* REMOVED fixed height: 500px; */
+    transition: flex-basis var(--transition-layout), max-width var(--transition-layout);
+}
+
+.preview-section {
+    flex: 0 0 0%;
+    opacity: 0;
+    /* REMOVED fixed height: 440px; */
+    overflow: hidden; /* Keep hidden for transition */
+    transition: flex-basis var(--transition-layout), opacity 0.4s ease-in-out 0.1s, padding var(--transition-layout); /* Refined transition */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.03); /* More subtle background */
+    padding: 0 20px; /* Initial horizontal padding, vertical added on expansion */
+    border-radius: 12px; /* Match card */
+    border: 1px solid rgba(255, 255, 255, 0.05); /* Very subtle border */
+    box-sizing: border-box;
+}
+
+/* When preview is active */
+.form-preview-wrapper.has-preview .form-section {
+    flex-basis: 50%;
+    max-width: 50%;
+}
+
+.form-preview-wrapper.has-preview .preview-section {
+    flex-basis: 50%;
+    opacity: 1;
+    padding: 25px 20px; /* Add vertical padding when visible */
+}
+
+.preview-title {
+    font-size: 1.1rem; /* Slightly smaller */
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text-secondary); /* Use variable */
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.nft-preview {
+    width: 100%;
+    /* max-width: 300px; REMOVED - Let flexbox handle width */
+    aspect-ratio: 1 / 1; /* Use aspect ratio instead of fixed height */
+    /* REMOVED height: 500px; */
+    border-radius: 10px; /* Consistent rounding */
+    border: 1px solid var(--border-color); /* Use variable */
+    object-fit: contain; /* Keep contain as primary */
+    background-color: rgba(0,0,0,0.2); /* Add subtle background for images with transparency */
+    display: block; /* Ensure it behaves as a block element */
+}
+
+/* --- Form Element Styling --- */
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Slightly reduced gap */
+    margin-bottom: 20px;
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+    padding: 12px 16px; /* Adjusted padding */
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-input); /* Thinner, subtler border */
+    border-radius: 8px; /* Consistent rounding */
+    color: var(--text-primary); /* Use variable */
+    font-size: 0.95rem; /* Slightly adjusted size */
+    font-family: inherit; /* Ensure font consistency */
+    transition: var(--transition-fast); /* Use variable */
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.2); /* Subtle inner shadow */
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+    color: var(--text-placeholder); /* Use variable */
+    opacity: 0.8; /* Make placeholder slightly less prominent */
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+    outline: none; /* Remove default outline */
+    border-color: var(--border-focus); /* Use focus color */
+    background-color: var(--bg-input-focus); /* Slightly change background on focus */
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3), inset 0 1px 2px rgba(0,0,0,0.2); /* Add focus ring */
+}
+
+.form-textarea {
+    min-height: 100px;
+    resize: vertical;
+    line-height: 1.5; /* Improve textarea readability */
+}
+
+/* Style the custom file input label as a button */
+.file-input-label {
+    display: inline-block;
+    padding: 12px 18px; /* Consistent padding */
+    background-color: var(--button-bg); /* Match connect button */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: var(--transition-fast); /* Use variable */
+    width: 100%; /* Make it full width */
+    box-sizing: border-box;
+}
+
+.file-input-label:hover {
+    background-color: var(--button-hover-bg); /* Match connect button */
+    transform: translateY(-1px);
+}
+
+.file-input-label:focus-within { /* Style when the hidden input inside has focus */
+     outline: 2px solid var(--border-focus);
+     outline-offset: 2px;
+}
+
+
+/* Loading/Prompt Text */
+.loading, .upload-prompt {
+    text-align: center;
+    margin: 15px 0;
+    color: var(--text-secondary); /* Use variable */
+    font-size: 0.9rem;
+}
+.loading { /* Add subtle animation */
+    animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Action Buttons */
+.create-btn, .ai-btn {
+    width: 100%;
+    padding: 14px 20px; /* Adjusted padding */
+    border: none;
+    border-radius: 10px; /* More rounded */
+    font-size: 1rem; /* Adjusted size */
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-base); /* Use base transition */
+    margin-top: 15px; /* Increased margin */
+    letter-spacing: 0.02em;
+}
+
+.create-btn {
+    background-color: var(--button-action-bg); /* Use variable */
+    color: white;
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3); /* Add shadow */
+}
+
+.create-btn:hover:not(:disabled) {
+    background-color: var(--button-action-hover-bg); /* Use variable */
+    transform: translateY(-2px); /* More lift */
+    box-shadow: 0 6px 15px rgba(79, 70, 229, 0.4);
+}
+
+.create-btn:disabled {
+    background-color: #555; /* Keep specific disabled color */
+    opacity: 0.6; /* Adjusted opacity */
+    cursor: not-allowed;
+    box-shadow: none; /* Remove shadow when disabled */
+}
+
+.ai-btn {
+    background-color: transparent;
+    color: var(--accent-secondary); /* Use variable */
+    border: 1.5px solid var(--accent-secondary); /* Slightly thicker border */
+}
+
+.ai-btn:hover:not(:disabled) {
+    background-color: rgba(0, 170, 255, 0.1); /* Keep original hover */
+    border-color: #33c6ff; /* Slightly brighter border on hover */
+    color: #33c6ff; /* Slightly brighter text on hover */
+    transform: translateY(-1px);
+}
+
+.ai-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: transparent;
+    border-color: rgba(0, 170, 255, 0.3);
+    color: rgba(0, 170, 255, 0.4);
+}
+
+/* Add focus states for buttons */
+.create-btn:focus-visible,
+.ai-btn:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 3px;
+}
+
+
+/* --- Rain Animation Styles --- */
+.rain-beam {
+    position: absolute;
+    top: -250px; /* Start higher */
+    width: 1px; /* Thinner */
+    height: 200px; /* Longer */
+    /* Smoother gradient */
+    background: linear-gradient(to bottom, rgba(99, 102, 241, 0), rgba(99, 102, 241, 0.5));
+    animation: fall 3s linear infinite; /* Adjust duration if needed */
+    opacity: 0.5; /* Slightly more subtle */
+    z-index: 5; /* Ensure it's above background but below card */
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(110vh); /* Ensure it goes well past the bottom */
+        opacity: 0; /* Fade out */
+    }
+}
+
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 768px) {
+    .content-wrapper {
+        padding: 25px 20px; /* Reduced padding on mobile */
+        border-radius: 12px; /* Slightly less rounded */
+    }
+
+    .create-title {
+        font-size: 1.8rem; /* Adjust title size */
+    }
+
+    .form-preview-wrapper {
+        flex-direction: column;
+        gap: 25px; /* Adjust gap for stacked layout */
+    }
+
+    /* Reset flex-basis and max-width when stacked */
+    .form-preview-wrapper .form-section,
+    .form-preview-wrapper.has-preview .form-section,
+    .form-preview-wrapper.has-preview .preview-section {
+        flex-basis: auto; /* Allow natural height */
+        max-width: 100%;
+    }
+
+    .form-preview-wrapper.has-preview .preview-section {
+        opacity: 1; /* Ensure visible */
+        padding: 20px; /* Consistent padding */
+        /* Height is now auto */
+    }
+
+    .nft-preview {
+        /* max-width: 250px; REMOVED - Let the container define width */
+        /* Height is now determined by aspect-ratio */
+    }
+
+    .form-input, .form-textarea, .form-select {
+        font-size: 0.9rem; /* Slightly smaller inputs on mobile */
+    }
+
+    .create-btn, .ai-btn {
+        padding: 12px 18px;
+        font-size: 0.95rem;
+    }
+}

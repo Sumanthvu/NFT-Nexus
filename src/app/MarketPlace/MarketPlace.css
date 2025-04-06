@@ -1,0 +1,310 @@
+/* MarketPlace.css - Refined Dark UI */
+
+/* --- Font Import (Orbitron for titles, Roboto for body) --- */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto:wght@300;400;500;700&display=swap');
+
+/* --- Base & Body - KEEPING BACKGROUND SETUP --- */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif; /* Body font */
+  color: #c0c8d8; /* Slightly softer base text color */
+
+  /* Layer 1: Deep Purple/Blue Gradient (Fixed) - Kept */
+  background-color: #0d0517; /* Dark purple fallback */
+  background-image: linear-gradient(145deg, #1a0a2e 0%, #0d0517 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+
+  overscroll-behavior-y: contain;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  z-index: 0;
+}
+
+/* --- Keyframes for Animations (Keeping basic fades/slides) --- */
+@keyframes slideUpFadeIn {
+  from { opacity: 0; transform: translateY(40px); } /* Slightly less distance */
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes subtleGlow { /* Subtle pulse for card hover */
+    0% { border-color: rgba(100, 120, 180, 0.3); box-shadow: 0 0 6px rgba(100, 120, 180, 0.1), inset 0 0 4px rgba(100, 120, 180, 0.05); }
+    50% { border-color: rgba(120, 140, 200, 0.5); box-shadow: 0 0 12px rgba(120, 140, 200, 0.2), inset 0 0 8px rgba(120, 140, 200, 0.1); }
+    100% { border-color: rgba(100, 120, 180, 0.3); box-shadow: 0 0 6px rgba(100, 120, 180, 0.1), inset 0 0 4px rgba(100, 120, 180, 0.05); }
+}
+
+@keyframes driftSubtle { /* Subtle background drift - Kept */
+  from { background-position: 0% 50%; }
+  to   { background-position: 100% 50%; }
+}
+
+
+/* --- Background Layers (Reduced Opacity) --- */
+body::before { /* Grid/Lines Layer */
+  content: '';
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(100, 110, 150, 0.04) 1px, transparent 1px), /* Subtler grid color */
+    linear-gradient(90deg, rgba(120, 100, 200, 0.04) 1px, transparent 1px);
+  background-size: 60px 60px; /* Slightly larger grid */
+  opacity: 0.3; /* Reduced opacity */
+  animation: driftSubtle 45s linear infinite alternate; /* Slower drift */
+}
+
+body::after { /* Soft Color Wash Layer */
+ content: '';
+ position: fixed; inset: 0; z-index: 1; pointer-events: none;
+ background: radial-gradient(ellipse at 20% 80%, rgba(100, 80, 180, 0.06) 0%, transparent 70%); /* Softer purple bottom left */
+ opacity: 0.5; /* Reduced opacity */
+}
+
+
+/* --- Main Container --- */
+.marketplace-page {
+  position: relative;
+  z-index: 2; /* Above background layers */
+  padding: 40px 20px 80px 20px; /* Adjusted padding */
+  max-width: 1600px; /* Maintain width */
+  margin: 0 auto;
+  box-sizing: border-box;
+  min-height: 100vh;
+}
+
+/* --- Heading Styles (Reduced Size & Glow) --- */
+.title-wrapper {
+    opacity: 0;
+    animation: slideUpFadeIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards; /* Slightly adjusted timing */
+}
+
+.marketplace-page h1 {
+  font-family: 'Orbitron', sans-serif;
+  text-align: center;
+  margin-bottom: 50px; /* Adjusted spacing */
+  color: #e8efff; /* Softer white/blue tint */
+  font-weight: 700; /* Slightly less bold */
+  /* Reduced font size */
+  font-size: clamp(2.2rem, 7vw, 4rem);
+  padding: 0 15px;
+  letter-spacing: 0.5px; /* Less spacing */
+  /* Removed intenseGlow animation */
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4); /* Subtle drop shadow */
+  line-height: 1.2;
+}
+
+/* --- Loading & Empty State (Minor tweaks) --- */
+.loading-indicator {
+  display: flex; justify-content: center; align-items: center; min-height: 250px;
+  text-align: center; padding: 40px 20px; font-size: 1.2em; color: #8a94a8; /* Adjusted color */
+  font-style: italic;
+}
+.no-nfts-found {
+  padding: 35px 20px; text-align: center; color: #788090; font-style: italic;
+  min-height: 80px; font-size: 1em; border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02); /* Very subtle background */
+  border: 1px dashed rgba(100, 110, 130, 0.2); /* Softer dashed border */
+}
+
+/* --- Section Styling & Animation (Reduced Glow, Softer Colors) --- */
+.nft-section {
+  margin-bottom: 60px; /* Adjusted spacing */
+  padding: 0 10px; /* Base padding */
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nft-section.is-visible { opacity: 1; transform: translateY(0); }
+
+.nft-section h2 {
+  font-family: 'Orbitron', sans-serif;
+  /* Reduced font size */
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  margin-bottom: 25px;
+  color: #a8c8ff; /* Softer blue title color */
+  font-weight: 500; /* Reduced weight */
+  padding-bottom: 12px;
+  letter-spacing: 0.2px;
+  position: relative;
+  overflow: hidden;
+  text-align: left;
+  border-bottom: 1px solid rgba(100, 120, 180, 0.25); /* Softer border color */
+  /* Removed glow animation */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+.section-title-inner { /* Keep animation for inner text, adjust timing */
+    display: inline-block; opacity: 0; transform: translateY(100%);
+    transition: opacity 0.5s ease 0.2s, transform 0.5s ease 0.2s;
+}
+.nft-section.is-visible .section-title-inner { opacity: 1; transform: translateY(0); }
+
+/* --- Horizontal Scroll Container (Softer Scrollbar) --- */
+.nft-scroll-container {
+  overflow-x: auto; overflow-y: hidden; padding: 10px 0 25px 0; /* Adjusted padding */
+  white-space: nowrap; position: relative; -webkit-overflow-scrolling: touch;
+  padding-left: 10px; padding-right: 10px; /* Match section padding */
+}
+
+/* --- Custom Dark Scrollbar (Subtle Blue/Grey) --- */
+.nft-scroll-container::-webkit-scrollbar {
+  height: 8px; background-color: rgba(10, 5, 20, 0.3); /* Slightly lighter dark track */
+}
+.nft-scroll-container::-webkit-scrollbar-thumb {
+  background: #3a4a6a; /* Darker, less saturated blue handle */
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Fainter border */
+}
+.nft-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #4f648a; /* Slightly lighter on hover */
+}
+.nft-scroll-container { /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #3a4a6a #1a0a2e; /* thumb track */
+}
+
+/* --- Row of NFT Cards --- */
+.nft-row { display: flex; flex-wrap: nowrap; gap: 20px; /* Slightly reduced gap */ min-width: min-content; }
+
+
+/* --- NFT Card Styling (Subtler Glass & Effects) --- */
+.nft-card {
+  background-color: rgba(25, 30, 50, 0.45); /* Slightly adjusted base color/opacity */
+  backdrop-filter: blur(6px) saturate(100%); /* Slightly less blur */
+  -webkit-backdrop-filter: blur(6px) saturate(100%);
+  border: 1px solid rgba(100, 120, 180, 0.25); /* Softer border */
+  border-radius: 10px; /* Slightly less rounding */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); /* Softer shadow */
+  transition: all 0.3s ease-out; /* Adjusted timing function */
+  display: flex; flex-direction: column; overflow: hidden;
+  width: 255px; /* Adjusted width */
+  flex-shrink: 0; height: auto; position: relative;
+}
+
+.nft-card:hover {
+  transform: translateY(-8px) scale(1.03); /* Less lift and scale */
+  border-color: rgba(120, 140, 200, 0.45); /* Softer hover border */
+  background-color: rgba(30, 35, 55, 0.55); /* Subtle background change */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); /* Adjusted hover shadow */
+  /* Removed pulsing border animation, replaced with subtle static glow */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3), 0 0 10px rgba(120, 140, 200, 0.15);
+}
+
+/* --- NFT Image Wrapper & Image --- */
+.nft-image-wrapper {
+    width: 100%; padding-top: 100%; position: relative;
+    background-color: #10141f; /* Consistent dark image bg */
+    border-bottom: 1px solid rgba(100, 120, 180, 0.1); /* Fainter separator */
+    overflow: hidden;
+}
+.nft-image {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; display: block; visibility: visible;
+  transition: visibility 0s, transform 0.3s ease, filter 0.3s ease;
+  filter: brightness(95%) saturate(90%); /* Slightly desaturated/darker base */
+}
+.nft-card:hover .nft-image {
+    transform: scale(1.01); /* Minimal zoom */
+    filter: brightness(105%) saturate(100%); /* Subtle pop */
+}
+.nft-image-placeholder {
+   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+   color: #505868; /* Adjusted placeholder text color */
+   font-size: 0.85em; font-style: italic; text-align: center; padding: 8px;
+   opacity: 0; transition: opacity 0.3s ease; background-color: #10141f;
+   pointer-events: none;
+}
+.nft-image-placeholder.show { opacity: 1; }
+
+/* --- NFT Card Information --- */
+.nft-card-info {
+  padding: 12px 14px; /* Adjusted padding */
+  text-align: center; margin-top: auto;
+  background: rgba(15, 18, 30, 0.5); /* Slightly adjusted info bg */
+  min-height: 50px; /* Adjusted min-height */
+  display: flex; flex-direction: column; justify-content: center;
+} 
+.nft-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.9em; /* Adjusted size */
+  font-weight: 500; color: #d8e0f0; /* Consistent light text */
+  margin: 0 0 10px 0; /* Adjusted space */
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.nft-action {
+    min-height: 34px; /* Adjusted height */
+    display: flex; align-items: center; justify-content: center;
+}
+
+/* --- Buy Button & Status Text (Subdued Style) --- */
+.buy-button {
+  font-family: 'Orbitron', sans-serif;
+  /* Replaced gradient with solid, less saturated color */
+  background-color: #4a5a8a; /* Muted blue */
+  color: #e0e8ff; /* Light text */
+  border: 1px solid rgba(200, 210, 230, 0.15); /* Subtle border */
+  padding: 8px 16px; /* Adjusted padding */
+  border-radius: 6px; cursor: pointer; font-size: 0.75em; /* Adjusted font size */
+  font-weight: 700; text-align: center; display: inline-block;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Reduced shadow */
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.buy-button:hover {
+  background-color: #5f74b0; /* Slightly lighter blue on hover */
+  border-color: rgba(200, 210, 230, 0.3);
+  color: #ffffff;
+  transform: translateY(-2px); /* Subtle lift */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25); /* Slightly stronger hover shadow */
+}
+.buy-button:active {
+  transform: translateY(0px);
+  background-color: #404e75; /* Darker on click */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.status-text {
+  font-family: 'Roboto', sans-serif;
+  font-style: italic; color: #808caf; /* Adjusted muted color */
+  font-size: 0.75em; padding: 8px 0; margin: 0;
+}
+
+
+/* --- Responsiveness (Minor Adjustments) --- */
+@media (max-width: 1400px) {
+  .marketplace-page { max-width: 1250px; } /* Adjusted max-width */
+}
+@media (max-width: 1200px) {
+  /* Keep negative margin trick for edge-to-edge feel if desired */
+  /* .nft-scroll-container { padding-left: 30px; padding-right: 30px; margin: 0 -30px; } */
+  /* .nft-section { padding: 0 30px; } */
+  /* OR use simple padding */
+   .nft-scroll-container { padding-left: 15px; padding-right: 15px; margin: 0; }
+   .nft-section { padding: 0 15px; }
+}
+@media (max-width: 992px) {
+  .marketplace-page { padding: 35px 15px 70px 15px; }
+  .nft-card { width: 230px; } /* Adjust card width */
+  .nft-row { gap: 18px; }
+  .nft-section { padding: 0 15px; } /* Consistent padding */
+  .nft-scroll-container { padding-left: 15px; padding-right: 15px; margin: 0; }
+}
+@media (max-width: 768px) {
+  .marketplace-page h1 { font-size: clamp(2rem, 8vw, 3rem); margin-bottom: 40px;}
+  .nft-section h2 { font-size: clamp(1.4rem, 4.5vw, 1.8rem); margin-bottom: 20px;}
+  .nft-card { width: 210px; }
+  .nft-row { gap: 15px; }
+  .nft-scroll-container { padding-left: 15px; padding-right: 15px; margin: 0; }
+  .nft-section { padding: 0 15px; }
+}
+@media (max-width: 576px) {
+  .nft-card { width: 190px; } /* Slightly smaller for very small screens */
+  .nft-row { gap: 12px; }
+  .nft-scroll-container { padding-left: 10px; padding-right: 10px; margin: 0; }
+  .nft-section { padding: 0 10px; }
+  .buy-button { padding: 7px 12px; font-size: 0.7em; }
+  .nft-name { font-size: 0.85em; }
+}

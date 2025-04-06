@@ -1,26 +1,62 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Custom styles for the animated border */
+.animated-border-box {
+    @apply relative overflow-hidden block; /* Ensure it's a block for the <a> tag and relative positioning */
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+  
+  .animated-border-box .border-span {
+    @apply absolute bg-blue-500; /* Or your desired border color */
+    content: ''; /* Necessary for pseudo-elements if used, good practice here */
+    transition: all 0.25s ease-out; /* Base transition for all spans */
+  }
+  
+  .animated-border-box .border-top {
+    @apply top-0 left-0 h-[2px] w-0; /* Start top border: invisible width */
+  }
+  
+  .animated-border-box .border-right {
+    @apply top-0 right-0 h-0 w-[2px]; /* Start right border: invisible height */
+    transition-delay: 0.25s; /* Delay starts after top border finishes */
+  }
+  
+  .animated-border-box .border-bottom {
+    @apply bottom-0 right-0 h-[2px] w-0; /* Start bottom border: invisible width */
+    transition-delay: 0.5s; /* Delay starts after right border finishes */
+  }
+  
+  .animated-border-box .border-left {
+    @apply bottom-0 left-0 h-0 w-[2px]; /* Start left border: invisible height */
+    transition-delay: 0.75s; /* Delay starts after bottom border finishes */
+  }
+  
+  /* Group hover state to trigger animations */
+  .animated-border-box:hover .border-top {
+    @apply w-full; /* Animate width */
+  }
+  
+  .animated-border-box:hover .border-right {
+    @apply h-full; /* Animate height */
+  }
+  
+  .animated-border-box:hover .border-bottom {
+    @apply w-full; /* Animate width */
+  }
+  
+  .animated-border-box:hover .border-left {
+    @apply h-full; /* Animate height */
+  }
+  
+  /* Optional: Slightly delay the content hover effect to let border start */
+  .animated-border-box .content-wrapper {
+     @apply transition-colors duration-200 ease-in-out delay-[50ms]; /* Adjust delay as needed */
+  }
+  
+  .animated-border-box:hover .content-wrapper {
+    @apply bg-[#2a2a2a];
+  }
+  
+  /* Remove default hover from the content wrapper if you want only the border animation */
+  /* .animated-border-box .content-wrapper {
+    @apply bg-[#1a1a1a];
+  } */

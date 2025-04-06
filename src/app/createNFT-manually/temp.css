@@ -1,0 +1,266 @@
+/* ./CreateNFT.css */
+
+/* Keep existing styles for .create-container, .create-title, .connect-btn, etc. */
+body {
+    background-color: #000; /* Ensure body background is black */
+    color: #fff;
+    font-family: sans-serif; /* Or your chosen font */
+  }
+  
+  .create-container {
+    min-height: 100vh; /* Ensure it takes full viewport height */
+    padding: 40px 20px;
+    display: flex; /* Center content wrapper if needed */
+    justify-content: center;
+    align-items: flex-start; /* Align content to top */
+    position: relative; /* Needed for absolute positioned children like rain */
+    overflow: hidden; /* Hide overflowing rain beams */
+  }
+  
+  .content-wrapper {
+    width: 100%;
+    max-width: 800px; /* Max width for the form/preview area */
+    max-height: 400px;
+    position: relative; /* Keep content above background */
+    z-index: 10; /* Keep content above background */
+    background-color: rgba(10, 10, 10, 0.8); /* Optional slightly transparent bg */
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0, 150, 255, 0.1);
+  }
+  
+  .create-title {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: #eee;
+  }
+  
+  .connect-btn {
+    display: block;
+    margin: 0 auto 30px auto;
+    padding: 10px 20px;
+    background-color: #3a3a3a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .connect-btn:hover {
+    background-color: #555;
+  }
+  
+  /* --- Layout Shift Styles --- */
+  
+  .form-preview-wrapper {
+    display: flex;
+    gap: 30px; /* Space between form and preview */
+    width: 100%;
+    transition: all 0.5s ease-in-out; /* Smooth transition for layout shift */
+  }
+  
+  .form-section {
+    flex: 1 1 100%; /* Initially take full width */
+    max-width: 100%;
+    height: 500px;
+    transition: flex-basis 0.5s ease-in-out, max-width 0.5s ease-in-out; /* Animate size change */
+  }
+  
+  .preview-section {
+    flex: 0 0 0%; /* Initially take no space */
+    opacity: 0;
+    height: 440px;
+    overflow: hidden; /* Prevent content spill during transition */
+    transition: flex-basis 0.5s ease-in-out, opacity 0.5s ease-in-out 0.2s; /* Animate size and fade-in */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: 8px;
+  }
+  
+  /* When preview is active */
+  .form-preview-wrapper.has-preview .form-section {
+    flex-basis: 50%; /* Take half the space */
+    max-width: 50%;
+  }
+  
+  .form-preview-wrapper.has-preview .preview-section {
+    flex-basis: 50%; /* Take the other half */
+    opacity: 1;
+  }
+  
+  .preview-title {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: #ccc;
+  }
+  
+  .nft-preview {
+    width: 100%;
+    max-width: 300px; /* Limit preview size */
+    height: 500px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    object-fit: cover;
+    object-fit: contain; /* Ensure image aspect ratio is maintained */
+  }
+  
+  /* --- Form Element Styling --- */
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Space between form elements */
+    margin-bottom: 20px;
+  }
+  
+  .form-input,
+  .form-textarea,
+  .form-select {
+    padding: 12px 15px;
+    background-color: #2a2a2a;
+    border: 2px solid #180880;
+    border-radius: 6px;
+    color: #f9f9f7;
+    font-size: 1rem;
+  }
+  
+  .form-input::placeholder,
+  .form-textarea::placeholder {
+    color: #888;
+  }
+  
+  .form-textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+  
+  /* Style the custom file input label */
+  .file-input-label {
+    display: inline-block; /* Or block */
+    padding: 12px 15px;
+    background-color: #3a3a3a;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
+  }
+  
+  .file-input-label:hover {
+    background-color: #555;
+  }
+  
+  /* Hide the actual file input visually but keep it accessible */
+  /* .file-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  } */
+  /* We used `hidden` attribute in JSX instead */
+  
+  
+  .loading, .upload-prompt {
+    text-align: center;
+    margin: 15px 0;
+    color: #aaa;
+  }
+  
+  .create-btn, .ai-btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, opacity 0.3s ease;
+    margin-top: 10px;
+  }
+  
+  .create-btn {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .create-btn:hover:not(:disabled) {
+    background-color: #0056b3;
+  }
+  
+  .create-btn:disabled {
+      background-color: #555;
+      opacity: 0.7;
+      cursor: not-allowed;
+  }
+  
+  
+  .ai-btn {
+    background-color: transparent;
+    color: #00aaff;
+    border: 1px solid #00aaff;
+  }
+  
+  .ai-btn:hover {
+    background-color: rgba(0, 170, 255, 0.1);
+  }
+  
+  /* --- Rain Animation Styles --- */
+  
+  /* .rain-background is handled by inline styles + component structure */
+  
+  .rain-beam {
+    position: absolute;
+    top: -200px; /* Start above the screen */
+    width: 2px; /* Beam width */
+    height: 150px; /* Beam height */
+    background: linear-gradient(to bottom, rgba(0, 150, 255, 0), rgba(0, 150, 255, 0.6)); /* Blue gradient */
+    animation: fall linear infinite; /* Apply the fall animation */
+  }
+  
+  @keyframes fall {
+    to {
+      transform: translateY(120vh); /* Move down past the viewport height */
+    }
+  }
+  
+  
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .content-wrapper {
+      padding: 20px;
+    }
+  
+    .form-preview-wrapper {
+      flex-direction: column; /* Stack form and preview vertically */
+    }
+  
+    /* Reset widths when stacked */
+    .form-preview-wrapper .form-section,
+    .form-preview-wrapper.has-preview .form-section,
+    .form-preview-wrapper.has-preview .preview-section {
+      flex-basis: auto;
+      max-width: 100%;
+    }
+  
+    .form-preview-wrapper.has-preview .preview-section {
+       opacity: 1; /* Ensure preview is visible */
+    }
+  
+    .nft-preview {
+      max-width: 250px; /* Adjust preview size */
+    }
+  
+    .create-title {
+      font-size: 2rem;
+    }
+  }
