@@ -1,5 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
+
+
 // Import the icons you want to use
 import { SquarePen, Sparkles } from "lucide-react";
 import { Inter, Poppins } from "next/font/google"; // Assuming you used Option 2 for fonts
