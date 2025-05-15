@@ -15,8 +15,10 @@
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@openzeppelin/contracts": "^5.2.0",
+    "@rainbow-me/rainbowkit": "^2.2.4",
     "@splinetool/react-spline": "^4.0.0",
     "@tabler/icons-react": "^3.31.0",
+    "@tanstack/react-query": "^5.76.1",
     "@walletconnect/web3-provider": "^1.8.0",
     "axios": "^1.8.4",
     "clsx": "^2.1.1",
@@ -35,7 +37,8 @@
     "react-intersection-observer": "^9.16.0",
     "react-router-dom": "^7.4.1",
     "tailwind-merge": "^3.1.0",
-    "wagmi": "^2.14.16",
+    "viem": "^2.29.3",
+    "wagmi": "^2.15.3",
     "web3modal": "^1.9.12"
   },
   "devDependencies": {

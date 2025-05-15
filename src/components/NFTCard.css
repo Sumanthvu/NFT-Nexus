@@ -1,0 +1,32 @@
+/* src/components/NFTCard.css */
+.nft-card .error-text {
+    color: #e74c3c; /* Red for errors */
+    font-size: 0.9em;
+  }
+  .nft-card .small-text {
+      font-size: 0.8em;
+      color: #7f8c8d;
+  }
+  .nft-card .image-placeholder-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%; /* Ensure it fills the image container space */
+      text-align: center;
+      font-size: 0.9em;
+      color: #555;
+      background-color: #f0f0f0; /* Light gray background for placeholder */
+      position: absolute; /* To overlay or be behind the img tag */
+      top: 0;
+      left: 0;
+  }
+  .nft-card .image-container img + .image-placeholder-content {
+      /* Initially hidden if image exists, JS will show on error */
+      display: none;
+  }
+  .nft-card .nft-category {
+      font-size: 0.85em;
+      color: #555;
+      margin-bottom: 8px;
+  }

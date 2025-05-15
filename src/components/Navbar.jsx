@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation'; // Import usePathname for active link styling
-
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 // Updated Logo with Tailwind classes for styling
 const Logo = () => (
     // Applying gradient matching the hero title to the logo
@@ -66,9 +66,12 @@ export default function Navbar() {
                              )
                         })}
                         {/* Optional: Connect Wallet Button - Styled to match */}
-                        <button className="ml-6 px-4 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 ease-in-out">
+                        {/* <button className="ml-6 px-4 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 ease-in-out">
                             Connect Wallet
-                        </button>
+                        </button> */}
+                        <div className="ml-6">
+                            <ConnectButton />
+                        </div>    
                     </div>
 
                     {/* Mobile Menu Button */}
