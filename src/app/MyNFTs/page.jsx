@@ -29,7 +29,7 @@ const NFT_CATEGORIES_FILTER_MAP = {
 };
 
 export default function ProfilePage() {
-  const [mounted, setMounted] = useState(false); // For client-side only logic
+  const [mounted, setMounted] = useState(false);
   const [pageError, setPageError] = useState("");
   const [filter, setFilter] = useState("all");
   const [isListingTokenId, setIsListingTokenId] = useState(null);
@@ -50,23 +50,49 @@ export default function ProfilePage() {
 
   const { data: balanceData, isLoading: isBalanceLoading } = useBalance({
     address: userAddress,
-    enabled: mounted && !!userAddress, // Enable only when mounted and address is available
+    enabled: mounted && !!userAddress,
   });
 
   const {
     data: myNftContractData,
-    isLoading: isLoadingMyNFTsInitial, // Initial load from contract
+    isLoading: isLoadingMyNFTsInitial,
     error: errorMyNFTs,
-    refetch: refetchMyNFTs,
-    isFetching: isRefetchingMyNFTs, // True when refetch is in progress
+    refetch: refetchMyNFTs, // Key function for explicit refetch
+    isFetching: isRefetchingMyNFTs,
+    status: myNftDataStatus, // 'idle', 'pending', 'success', 'error'
   } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: 'getMyNFTs',
     account: userAddress,
-    // Enable only when mounted, connected, and address is available
     enabled: mounted && isConnected && !!userAddress && !isConnecting,
   });
+
+  // --- <<< MODIFIED useEffect FOR EXPLICIT REFETCHING >>> ---
+  useEffect(() => {
+    console.log(
+      `ProfilePage Effect (refetch check): mounted=${mounted}, isConnected=${isConnected}, userAddress=${userAddress}, isConnecting=${isConnecting}, myNftDataStatus=${myNftDataStatus}`
+    );
+    if (mounted && isConnected && !!userAddress && !isConnecting) {
+      // Always attempt to refetch if conditions are met, especially if userAddress just became available
+      // or if navigating to the page. This ensures fresh data for the current user.
+      console.log("ProfilePage: Conditions met for fetching. Calling refetchMyNFTs(). Current data length:", myNftContractData?.length);
+      refetchMyNFTs()
+        .then(result => {
+          console.log("ProfilePage: refetchMyNFTs successful. New data length:", result?.data?.length);
+        })
+        .catch(err => {
+          console.error("ProfilePage: refetchMyNFTs failed:", err);
+        });
+    } else if (isDisconnected || !userAddress) {
+        console.log("ProfilePage: Conditions NOT met for fetching (disconnected or no address).");
+    }
+    // Key dependencies: mounted, isConnected, userAddress, isConnecting.
+    // refetchMyNFTs is stable and doesn't need to be a dependency for triggering the refetch itself,
+    // but it's good practice to include functions called within an effect if they aren't guaranteed stable.
+    // However, for triggering based on user state changes, userAddress is critical.
+  }, [mounted, isConnected, userAddress, isConnecting, refetchMyNFTs]); // Added refetchMyNFTs to satisfy eslint, it's stable.
+
 
   const { data: fetchedListingFee, error: listingFeeError } = useReadContract({
     address: CONTRACT_ADDRESS,
@@ -116,37 +142,42 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (isListingSuccess) {
-      alert("NFT listed successfully!"); refetchMyNFTs(); setIsListingTokenId(null);
+      alert("NFT listed successfully!");
+      console.log("ProfilePage: NFT Listing successful, tx hash:", listTxData?.hash);
+      refetchMyNFTs(); // Refetch after successful listing
+      setIsListingTokenId(null);
     }
     const submissionError = listSubmitError || listConfirmationError;
     if (submissionError && isListingTokenId) {
-      alert(`Listing failed: ${submissionError?.shortMessage || submissionError?.message}`);
+      console.error("ProfilePage: NFT Listing failed:", submissionError);
+      alert(`Listing failed: ${submissionError?.shortMessage || submissionError?.message || 'Unknown error'}`);
       setIsListingTokenId(null);
     }
-  }, [isListingSuccess, listSubmitError, listConfirmationError, refetchMyNFTs, isListingTokenId]);
+  }, [isListingSuccess, listSubmitError, listConfirmationError, refetchMyNFTs, listTxData, isListingTokenId]);
+
 
   // --- Spotlight Handlers ---
-  const handleMouseMove = (e) => { /* ... */ }; const handleMouseEnter = () => setSpotlightOpacity(1); const handleMouseLeave = () => setSpotlightOpacity(0);
-  // (Spotlight logic remains the same)
   useEffect(() => {
     const currentRef = profileHeaderRef.current;
+    const mouseMoveHandler = (e) => {
+        if (!profileHeaderRef.current) return;
+        const rect = profileHeaderRef.current.getBoundingClientRect();
+        setSpotlightPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    };
+    const mouseEnterHandler = () => setSpotlightOpacity(1);
+    const mouseLeaveHandler = () => setSpotlightOpacity(0);
+
     if (currentRef) {
-        const mouseMove = (e) => {
-            if (!profileHeaderRef.current) return;
-            const rect = profileHeaderRef.current.getBoundingClientRect();
-            setSpotlightPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-        };
-        currentRef.addEventListener('mousemove', mouseMove);
-        currentRef.addEventListener('mouseenter', handleMouseEnter);
-        currentRef.addEventListener('mouseleave', handleMouseLeave);
+        currentRef.addEventListener('mousemove', mouseMoveHandler);
+        currentRef.addEventListener('mouseenter', mouseEnterHandler);
+        currentRef.addEventListener('mouseleave', mouseLeaveHandler);
         return () => {
-            currentRef.removeEventListener('mousemove', mouseMove);
-            currentRef.removeEventListener('mouseenter', handleMouseEnter);
-            currentRef.removeEventListener('mouseleave', handleMouseLeave);
+            currentRef.removeEventListener('mousemove', mouseMoveHandler);
+            currentRef.removeEventListener('mouseenter', mouseEnterHandler);
+            currentRef.removeEventListener('mouseleave', mouseLeaveHandler);
         };
     }
-  }, []);
-
+  }, []); // Runs once after profileHeaderRef is set
 
   // --- Filtered NFTs ---
   const nftsToDisplay = useMemo(() => {
@@ -156,33 +187,35 @@ export default function ProfilePage() {
   }, [myNftContractData, filter]);
 
   // --- Overall Page Status ---
+  // isLoadingMyNFTsInitial is true only on the very first fetch or after cache invalidation.
+  // isRefetchingMyNFTs is true when a refetch is in progress (explicit or automatic).
   const isLoadingPageData = !mounted || isLoadingMyNFTsInitial || isRefetchingMyNFTs || isConnecting;
   let mainPageError = pageError;
   if (errorMyNFTs) mainPageError = `Error fetching NFTs: ${errorMyNFTs.shortMessage || errorMyNFTs.message}`;
 
-  // Effect for logging and handling connection states
+  // Effect for logging main page state and handling general connection messages
   useEffect(() => {
-    console.log(`ProfilePage State: mounted=${mounted}, isConnected=${isConnected}, isConnecting=${isConnecting}, userAddress=${userAddress}, isLoadingMyNFTsInitial=${isLoadingMyNFTsInitial}, isRefetchingMyNFTs=${isRefetchingMyNFTs}`);
+    // This log helps see the state when other effects might be running or conditions change.
+    console.log(
+      `ProfilePage State Log: mounted=${mounted}, isConnected=${isConnected}, isConnecting=${isConnecting}, userAddress=${userAddress}, isLoadingMyNFTsInitial=${isLoadingMyNFTsInitial}, isRefetchingMyNFTs=${isRefetchingMyNFTs}, myNftDataStatus=${myNftDataStatus}, myNftContractData length=${myNftContractData?.length}`
+    );
     if (mounted) {
         if (isDisconnected && !isConnecting) {
             setPageError("Please connect your wallet to view your profile.");
-        } else if (isConnected && userAddress) {
-            setPageError(""); // Clear "connect" error
-            // refetchMyNFTs(); // Reconsider if refetchMyNFTs is needed here; enabled flag should handle it.
-                           // If account changes, useReadContract with 'account' prop will refetch.
+        } else if (isConnected && userAddress && !errorMyNFTs) { // Only clear if no NFT fetch error
+            setPageError("");
         } else if (isConnecting) {
-            setPageError(""); // Clear other errors while connecting
+            setPageError("");
         }
     }
-  }, [mounted, isConnected, isDisconnected, isConnecting, userAddress, isLoadingMyNFTsInitial, isRefetchingMyNFTs]);
+  }, [mounted, isConnected, isDisconnected, isConnecting, userAddress, isLoadingMyNFTsInitial, isRefetchingMyNFTs, myNftDataStatus, errorMyNFTs, myNftContractData]);
 
 
   // --- Render Logic ---
-  if (!mounted) { // Show basic loading shell until client is mounted
+  if (!mounted) {
     return (
       <div className="profile-page content" style={{ textAlign: 'center', padding: '50px' }}>
-        <h1>My Profile</h1>
-        <p>Loading page...</p>
+        <h1>My Profile</h1> <p>Loading page...</p>
       </div>
     );
   }
@@ -190,8 +223,7 @@ export default function ProfilePage() {
   if (isConnecting) {
     return (
       <div className="profile-page content" style={{ textAlign: 'center', padding: '50px' }}>
-        <h1>My Profile</h1>
-        <p>Connecting to wallet...</p>
+        <h1>My Profile</h1> <p>Connecting to wallet...</p>
       </div>
     );
   }
@@ -199,14 +231,10 @@ export default function ProfilePage() {
   if (isDisconnected && !isConnecting) {
     return (
       <div className="profile-page content" style={{ textAlign: 'center', padding: '50px' }}>
-        <h1>My Profile</h1>
-        <p>Please connect your wallet to view your NFTs.</p>
-        {/* You might want to add a <w3m-button /> here if Web3Modal is used */}
+        <h1>My Profile</h1> <p>Please connect your wallet to view your NFTs.</p>
       </div>
     );
   }
-
-  // From this point, we assume `mounted` is true and user is `isConnected` (or was trying to connect)
 
   return (
     <>
@@ -225,7 +253,7 @@ export default function ProfilePage() {
             </div>
           </header>
 
-          {userAddress && ( // Only show NFT section if user is connected and address is available
+          {userAddress && (
             <section className="nft-section">
               <div className="section-header">
                 <h2>My NFT Collection</h2>
@@ -236,11 +264,11 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {isLoadingPageData && !mainPageError && ( // Show skeletons if loading page data and no major error
+              {isLoadingPageData && !mainPageError && (
                 <>
                   <p style={{textAlign: 'center', margin: '20px'}}>Loading your NFT collection...</p>
                   <div className="loading-grid">
-                    {[...Array(6)].map((_, i) => (
+                    {[...Array(myNftContractData?.length || 6)].map((_, i) => ( // Show skeletons based on previous data or default
                       <div key={`skeleton-${i}`} className="nft-card skeleton">
                         <div className="image-placeholder skeleton-bg"></div>
                         <div className="info-placeholder"><div className="skeleton-text skeleton-bg"></div><div className="skeleton-text short skeleton-bg"></div></div>
@@ -250,17 +278,19 @@ export default function ProfilePage() {
                 </>
               )}
 
-              {!isLoadingPageData && mainPageError && ( // Show error if done loading but there's an error
+              {!isLoadingPageData && mainPageError && (
                 <div className="error-message">{mainPageError}</div>
               )}
 
-              {!isLoadingPageData && !mainPageError && nftsToDisplay.length === 0 && ( // Done loading, no error, no NFTs
+              {!isLoadingPageData && !mainPageError && nftsToDisplay.length === 0 && (
                 <div className="empty-message">
-                  {filter === 'all' ? "You don't own any NFTs, or they are still processing." : `No NFTs found in '${NFT_CATEGORIES_FILTER_MAP[filter]}'.`}
+                  {myNftDataStatus === 'success' /* Check if fetch was successful but returned 0 items */
+                    ? (filter === 'all' ? "You don't own any NFTs." : `No NFTs found in '${NFT_CATEGORIES_FILTER_MAP[filter]}'.`)
+                    : "Could not load NFTs or your collection is empty."}
                 </div>
               )}
 
-              {!isLoadingPageData && !mainPageError && nftsToDisplay.length > 0 && ( // Done loading, no error, NFTs exist
+              {!isLoadingPageData && !mainPageError && nftsToDisplay.length > 0 && (
                 <div className="nft-grid">
                   {nftsToDisplay.map(nftContractItem => (
                     <NFTCard
@@ -276,7 +306,6 @@ export default function ProfilePage() {
             </section>
           )}
 
-          {/* Fallback general page error if not covered above */}
           {pageError && !mainPageError && !isLoadingPageData && (
              <div className="error-message" style={{textAlign: 'center', marginTop: '20px'}}>{pageError}</div>
           )}

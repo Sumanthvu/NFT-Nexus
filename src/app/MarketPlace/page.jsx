@@ -1,220 +1,283 @@
+// app/Marketplace/page.js (or your path)
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { ethers } from "ethers";
-import { useInView } from 'react-intersection-observer'; // Keep for section animations
+import { useInView } from 'react-intersection-observer';
+import {
+  useAccount,
+  useReadContract,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useBlockNumber, // For triggering refetches on new blocks
+} from 'wagmi';
+import { parseEther, formatEther } from 'viem';
 
+import NFTMarketplaceContract from "../../contract_data/NFTMarketplace.json"; // Renamed for clarity
+import "./MarketPlace.css";
 
-// Assuming contract ABI is correctly placed relative to this component
-import NFTMarketplace from "../../contract_data/NFTMarketplace.json";
-import "./MarketPlace.css"; // We will apply the new styles here
+const CONTRACT_ADDRESS = "0x13b8718898f70eF57424295b1b6A1eae3F5a0238";
+const CONTRACT_ABI = NFTMarketplaceContract.abi;
 
-const contractAddress = "0x13b8718898f70eF57424295b1b6A1eae3F5a0238"; // Your contract address
-
-// --- Constants and Mappings ---
 const NFTCategoryMap = { 0: "Artwork", 1: "Video", 2: "GIF" };
 const NFT_CATEGORY_ARTWORK = 0;
 const NFT_CATEGORY_VIDEO = 1;
 const NFT_CATEGORY_GIF = 2;
 
-// --- Helper Component for Animated Sections ---
+// --- Helper Component for Animated Sections (No change) ---
 const AnimatedSection = ({ children, title }) => {
-  const { ref, inView } = useInView({
-    triggerOnce: true, // Only trigger animation once
-    threshold: 0.1,
-    rootMargin: '-50px 0px',
-  });
-
+  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1, rootMargin: '-50px 0px' });
   return (
-    <section
-      ref={ref}
-      className={`nft-section ${inView ? 'is-visible' : ''}`} // CSS class toggled based on view
-    >
-      {/* Added span for independent title animation */}
+    <section ref={ref} className={`nft-section ${inView ? 'is-visible' : ''}`}>
       <h2><span className="section-title-inner">{title}</span></h2>
       {children}
     </section>
   );
 };
 
+// --- Individual NFT Card Component for Marketplace ---
+// It's good practice to componentize the card for cleaner logic
+function MarketplaceNFTCard({ nftContractData, onBuyNFT, isBuyingThisToken, isProcessingBuy }) {
+  const [metadata, setMetadata] = useState(null);
+  const [metadataError, setMetadataError] = useState('');
+  const [isLoadingCardDetails, setIsLoadingCardDetails] = useState(true);
+  const tokenId = nftContractData.tokenId;
 
-// --- Main Marketplace Component ---
-// Removed unused provider/signer props as ethers.BrowserProvider is used internally
+  const { data: tokenURI, error: tokenURIError, isLoading: isLoadingTokenURI } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: CONTRACT_ABI,
+    functionName: 'tokenURI',
+    args: [tokenId],
+    enabled: !!tokenId,
+  });
+
+  useEffect(() => {
+    if (isLoadingTokenURI) {
+      setIsLoadingCardDetails(true); return;
+    }
+    if (tokenURIError) {
+      setMetadataError(`URI Error: ${tokenURIError.shortMessage}`);
+      setIsLoadingCardDetails(false); return;
+    }
+    if (tokenURI) {
+      const fetchMetadata = async () => {
+        setIsLoadingCardDetails(true); setMetadataError('');
+        let gatewayUrl = tokenURI.startsWith('ipfs://') ? `https://gateway.pinata.cloud/ipfs/${tokenURI.split('ipfs://')[1]}` : tokenURI;
+        if (!gatewayUrl.startsWith('http')) {
+          setMetadataError("Invalid meta URL"); setIsLoadingCardDetails(false); return;
+        }
+        try {
+          const response = await fetch(gatewayUrl, { signal: AbortSignal.timeout(15000) });
+          if (!response.ok) throw new Error(`Status ${response.status}`);
+          let fetchedMeta = await response.json();
+          if (fetchedMeta.image && fetchedMeta.image.startsWith('ipfs://')) {
+            fetchedMeta.image = `https://gateway.pinata.cloud/ipfs/${fetchedMeta.image.split('ipfs://')[1]}`;
+          }
+          setMetadata(fetchedMeta);
+        } catch (err) { setMetadataError(`Meta: ${err.message.substring(0,20)}`); }
+        finally { setIsLoadingCardDetails(false); }
+      };
+      fetchMetadata();
+    } else if (tokenId) {
+        setMetadataError("No token URI found."); setIsLoadingCardDetails(false);
+    }
+  }, [tokenURI, tokenId, tokenURIError, isLoadingTokenURI]);
+
+  if (isLoadingCardDetails) {
+    return (
+      <div className="nft-card skeleton-card-market">
+        <div className="nft-image-wrapper skeleton-bg"></div>
+        <div className="nft-card-info"><div className="skeleton-text-market"></div></div>
+      </div>
+    );
+  }
+
+  const displayName = metadata?.name || `NFT #${Number(tokenId)}`;
+  const displayImage = metadata?.image;
+
+  if (metadataError && !metadata) {
+    return (
+        <div className="nft-card error-card-market">
+            <div className="nft-image-wrapper error-placeholder">⚠️</div>
+            <div className="nft-card-info"><p className="nft-name" title={displayName}>{displayName.substring(0,25)}</p><p className="error-text-market">{metadataError}</p></div>
+        </div>
+    );
+  }
+
+  return (
+    <div className="nft-card">
+      <div className="nft-image-wrapper">
+        {displayImage ? (
+          <>
+            <img src={displayImage} alt={displayName} className="nft-image" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; const placeholder = e.currentTarget.nextElementSibling; if (placeholder) placeholder.classList.add('show'); }} />
+            <div className="nft-image-placeholder" aria-label="Image failed to load">No Image</div>
+          </>
+        ) : (<div className="nft-image-placeholder show">No Image Provided</div>)}
+      </div>
+      <div className="nft-card-info">
+        <p className="nft-name" title={displayName}>{displayName.substring(0, 25)}{displayName.length > 25 ? "..." : ""}</p>
+        <div className="nft-action">
+          {nftContractData.currentlyListed && nftContractData.price > 0 ? (
+            <button className="buy-button" onClick={() => onBuyNFT(tokenId, nftContractData.price)} disabled={isProcessingBuy || isBuyingThisToken}>
+              {(isBuyingThisToken && isProcessingBuy) ? <span className="spinner-small"/> : `Buy • ${formatEther(nftContractData.price)} ETH`}
+            </button>
+          ) : (<p className="status-text">Not Listed</p>)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// --- Main Marketplace Component (Refactored with Wagmi) ---
 export default function Marketplace() {
-  const [nfts, setNfts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+  const [activeBuyTokenId, setActiveBuyTokenId] = useState(null); // For buy button loading state
 
-  // --- Fetch NFTs from Contract (Function remains the same) ---
-  const loadNFTs = async () => {
-    setLoading(true);
-    console.log("Attempting to load NFTs...");
-    try {
-      // Use window.ethereum directly as provider might not be passed
-      if (!window.ethereum) {
-        console.error("No Ethereum provider found. Cannot load NFTs.");
-        alert("Please connect an Ethereum wallet (like MetaMask).");
-        setLoading(false);
-        return;
-      }
-      const currentProvider = new ethers.BrowserProvider(window.ethereum);
+  const { isConnected } = useAccount(); // Check if wallet is connected for buying
 
-      const contract = new ethers.Contract(contractAddress, NFTMarketplace.abi, currentProvider);
-      console.log("Fetching all NFTs...");
-      const data = await contract.getAllNFTs();
-      console.log(`Raw NFT data fetched: ${data.length} items`);
-      const items = await Promise.all(
-        data.map(async (nft) => {
-          try {
-            const categoryValue = Number(nft.category);
-            const categoryName = NFTCategoryMap[categoryValue] || "Unknown";
-            const tokenId = Number(nft.tokenId);
-            let meta = { image: "", name: `NFT #${tokenId}`, description: "" };
-            try {
-              const tokenURI = await contract.tokenURI(tokenId);
-              if (tokenURI && (tokenURI.startsWith('http') || tokenURI.startsWith('ipfs') || tokenURI.startsWith('data:'))) {
-                const displayURI = tokenURI.startsWith('ipfs://')
-                  ? `https://ipfs.io/ipfs/${tokenURI.split('ipfs://')[1]}`
-                  : tokenURI;
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
-                const metaRes = await fetch(displayURI, { cache: 'force-cache', signal: controller.signal });
-                clearTimeout(timeoutId);
-                if (!metaRes.ok) { throw new Error(`HTTP error! status: ${metaRes.status}`); }
-                meta = await metaRes.json();
-                meta.name = meta.name || `NFT #${tokenId}`;
-                meta.image = meta.image || "";
-                meta.description = meta.description || "";
-              } else { console.warn(`Invalid/missing tokenURI for ID ${tokenId}: ${tokenURI}`); }
-            } catch (metaErr) { console.error(`Metadata error for ID ${tokenId}:`, metaErr); }
-            return { tokenId, categoryValue, categoryName, currentlyListed: nft.currentlyListed, price: nft.price > 0 ? ethers.formatEther(nft.price) : "0", owner: nft.owner, seller: nft.seller, image: meta.image, name: meta.name, description: meta.description };
-          } catch (individualErr) { console.error(`Error processing NFT ID ${nft.tokenId}:`, individualErr); return null; }
-        })
-      );
-      const validItems = items.filter((item) => item !== null);
-      console.log(`Processed ${validItems.length} valid items.`);
-      setNfts(validItems);
-    } catch (err) { console.error("Error loading NFTs:", err); }
-    finally { setLoading(false); console.log("Finished NFT load attempt."); }
+  // For auto-refreshing NFT list on new blocks (optional but good UX)
+  const { data: blockNumber } = useBlockNumber({ watch: true });
+
+  // Fetch All NFTs from contract
+  const {
+    data: allNftsContractData, // This is the array of ListedToken structs
+    isLoading: isLoadingAllNFTs,
+    error: errorAllNFTs,
+    refetch: refetchAllNFTs,
+    isFetching: isRefetchingAllNFTs,
+  } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: CONTRACT_ABI,
+    functionName: 'getAllNFTs',
+    enabled: mounted, // Fetch as soon as component is mounted
+    // Consider adding blockNumber to args or use it to trigger refetch if needed for freshness
+    // args: [blockNumber], // If your contract took blockNumber, or just use useEffect below
+  });
+
+  // Refetch NFTs when a new block is mined to get latest listings/sales
+  useEffect(() => {
+    if (mounted && blockNumber) { // blockNumber will change on new blocks
+      console.log("Marketplace: New block detected, refetching all NFTs.", blockNumber);
+      refetchAllNFTs();
+    }
+  }, [blockNumber, mounted, refetchAllNFTs]);
+
+
+  useEffect(() => {
+    setMounted(true);
+    console.log("Marketplace: Component mounted.");
+  }, []);
+
+  // --- Buy NFT Logic with Wagmi ---
+  const {
+    data: buyTxData,
+    writeContract: executeBuyNFT,
+    isPending: isSubmittingBuyTx,
+    error: buySubmitError,
+  } = useWriteContract();
+
+  const {
+    isLoading: isConfirmingBuy,
+    isSuccess: isBuySuccess,
+    error: buyConfirmationError,
+  } = useWaitForTransactionReceipt({
+    hash: buyTxData?.hash,
+    confirmations: 1,
+  });
+
+  const handleBuyNFT = async (tokenIdToBuy, priceInWei) => { // priceInWei is BigInt from contract
+    if (!isConnected) {
+      alert("Please connect your wallet to buy an NFT.");
+      // Optionally trigger wallet connection modal here
+      return;
+    }
+    setActiveBuyTokenId(tokenIdToBuy);
+    console.log(`Marketplace: Attempting to buy Token ID: ${Number(tokenIdToBuy)}, Price (Wei): ${priceInWei.toString()}`);
+    executeBuyNFT({
+      address: CONTRACT_ADDRESS,
+      abi: CONTRACT_ABI,
+      functionName: 'executeSale',
+      args: [tokenIdToBuy],
+      value: priceInWei, // Price is already in Wei from contract data
+    });
   };
 
-  // --- Buy NFT Function (Function remains the same) ---
-  const buyNFT = async (tokenId, priceInEth) => {
-     console.log(`Attempting purchase: Token ${tokenId} for ${priceInEth} ETH`);
-     try {
-       if (!window.ethereum) { alert("Please install MetaMask."); throw new Error("MetaMask not installed."); }
-       const browserProvider = new ethers.BrowserProvider(window.ethereum);
-       const signer = await browserProvider.getSigner(); // Needs signer to buy
-       const contractWithSigner = new ethers.Contract(contractAddress, NFTMarketplace.abi, signer);
-       const priceInWei = ethers.parseEther(priceInEth);
-       console.log(`Sending tx for ${priceInWei} wei...`);
-       const tx = await contractWithSigner.executeSale(tokenId, { value: priceInWei });
-       console.log("Tx sent:", tx.hash);
-       alert("Purchase sent! Waiting for confirmation...");
-       await tx.wait();
-       console.log("Tx confirmed!");
-       alert("NFT bought successfully!");
-       loadNFTs(); // Refresh list after buying
-     } catch (error) {
-       console.error("Buy NFT error:", error);
-       alert(`Buy error: ${error.reason || error.message || "Unknown error."}`);
-     }
-   };
-
-  // --- Effects ---
   useEffect(() => {
-    loadNFTs();
-  }, []); // Runs only once on mount
+    if (isSubmittingBuyTx) console.log("Marketplace: Buy transaction submitted to wallet...");
+    if (isBuySuccess) {
+      alert("NFT bought successfully!");
+      console.log("Marketplace: Buy successful, tx hash:", buyTxData?.hash);
+      refetchAllNFTs(); // Refresh list after successful buy
+      setActiveBuyTokenId(null);
+    }
+    const submissionOrConfirmationError = buySubmitError || buyConfirmationError;
+    if (submissionOrConfirmationError && activeBuyTokenId) {
+      console.error("Marketplace: Buy NFT error:", submissionOrConfirmationError);
+      alert(`Buy error: ${submissionOrConfirmationError?.shortMessage || submissionOrConfirmationError?.message}`);
+      setActiveBuyTokenId(null);
+    }
+  }, [isSubmittingBuyTx, isBuySuccess, buySubmitError, buyConfirmationError, refetchAllNFTs, buyTxData, activeBuyTokenId]);
 
-  // --- Memoized Derived State for Categories (Remains the same) ---
-  const sortNewestFirst = (a, b) => b.tokenId - a.tokenId;
-  const latestNfts = useMemo(() => [...nfts].sort(sortNewestFirst), [nfts]);
-  const artworkNfts = useMemo(() => nfts.filter(nft => nft.categoryValue === NFT_CATEGORY_ARTWORK).sort(sortNewestFirst), [nfts]);
-  const videoNfts = useMemo(() => nfts.filter(nft => nft.categoryValue === NFT_CATEGORY_VIDEO).sort(sortNewestFirst), [nfts]);
-  const gifNfts = useMemo(() => nfts.filter(nft => nft.categoryValue === NFT_CATEGORY_GIF).sort(sortNewestFirst), [nfts]);
+  // --- Memoized Derived State for Categories ---
+  const sortNewestFirst = (a, b) => Number(b.tokenId) - Number(a.tokenId); // Ensure numbers for sort
 
-  // --- Render Function for NFT Lists (Corrected Card Structure) ---
+  const nftsForDisplay = useMemo(() => {
+    if (!allNftsContractData) return [];
+    return [...allNftsContractData].sort(sortNewestFirst); // Start with all sorted
+  }, [allNftsContractData]);
+
+  const artworkNfts = useMemo(() => nftsForDisplay.filter(nft => Number(nft.category) === NFT_CATEGORY_ARTWORK), [nftsForDisplay]);
+  const videoNfts = useMemo(() => nftsForDisplay.filter(nft => Number(nft.category) === NFT_CATEGORY_VIDEO), [nftsForDisplay]);
+  const gifNfts = useMemo(() => nftsForDisplay.filter(nft => Number(nft.category) === NFT_CATEGORY_GIF), [nftsForDisplay]);
+
+  // --- Render Function for NFT Lists ---
   const renderNftList = (nftList, categoryTitle) => {
-    if (loading && nfts.length === 0) return null;
-    if (nftList.length === 0 && !loading) {
+    // isLoadingAllNFTs refers to the initial load of the main list
+    // Individual cards will show their own skeletons for metadata loading
+    if (isLoadingAllNFTs && nftList.length === 0) return null; // Avoid rendering section if main list is loading
+
+    if (nftList.length === 0 && !isLoadingAllNFTs) {
       return <p className="no-nfts-found">No {categoryTitle} currently available.</p>;
     }
     return (
       <div className="nft-scroll-container">
         <div className="nft-row">
-          {nftList.map((nft) => (
-            <div key={`${categoryTitle}-${nft.tokenId}`} className="nft-card">
-              {/* Image Section */}
-              <div className="nft-image-wrapper">
-                {nft.image ? (
-                  <> {/* Fragment for image and its placeholder sibling */}
-                    <img
-                      src={nft.image.startsWith('ipfs://') ? `https://ipfs.io/ipfs/${nft.image.split('ipfs://')[1]}` : nft.image}
-                      alt={nft.name || `NFT ${nft.tokenId}`}
-                      className="nft-image"
-                      loading="lazy"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        const placeholder = e.currentTarget.nextElementSibling;
-                        if (placeholder && placeholder.classList.contains('nft-image-placeholder')) {
-                            placeholder.classList.add('show');
-                        }
-                      }}
-                    />
-                    <div className="nft-image-placeholder" aria-label="Image failed to load">No Image</div>
-                  </>
-                ) : (
-                  <div className="nft-image-placeholder show">No Image Provided</div>
-                )}
-              </div> {/* End nft-image-wrapper */}
-
-              {/* Info Section (Simplified) */}
-              <div className="nft-card-info">
-                <p className="nft-name" title={nft.name}>
-                   {nft.name}
-                </p>
-                <div className="nft-action">
-                  {nft.currentlyListed ? (
-                    (nft.price && parseFloat(nft.price) > 0) ? (
-                      <button className="buy-button" onClick={() => buyNFT(nft.tokenId, nft.price)}>
-                        Buy • {nft.price} ETH
-                      </button>
-                    ) : (
-                      <p className="status-text">Price Error</p>
-                    )
-                  ) : (
-                    <p className="status-text">Not Listed</p>
-                  )}
-                </div>
-              </div> {/* End nft-card-info */}
-            </div> // End nft-card
+          {nftList.map((nft) => ( // nft is an item from allNftsContractData
+            <MarketplaceNFTCard
+              key={`${categoryTitle}-${nft.tokenId.toString()}`}
+              nftContractData={nft}
+              onBuyNFT={handleBuyNFT}
+              isBuyingThisToken={activeBuyTokenId === nft.tokenId}
+              isProcessingBuy={isSubmittingBuyTx || isConfirmingBuy}
+            />
           ))}
-          {/* Spacer */}
-          <div style={{ minWidth: '1px' }}></div>
-        </div> {/* End nft-row */}
-      </div> // End nft-scroll-container
+          <div style={{ minWidth: '1px' }}></div> {/* Spacer */}
+        </div>
+      </div>
     );
   };
-  // --- ---
 
   // --- Main Component Render ---
+  if (!mounted) {
+    return <main className="marketplace-page"><div className="loading-indicator">Loading Marketplace...</div></main>;
+  }
+
+  const pageIsLoading = isLoadingAllNFTs || isRefetchingAllNFTs;
+
   return (
-    // Changed container class to match styles better if needed
-    
     <main className="marketplace-page">
-          
+      <div className="title-wrapper">
+        <h1>Explore the NFT Metaverse</h1>
+      </div>
 
-       <div className="title-wrapper">
-           <h1>Explore the NFT Metaverse</h1>
-       </div>
-
-      {loading && nfts.length === 0 ? (
-        <div className="loading-indicator">
-           Fetching NFTs from the blockchain...
-        </div>
+      {pageIsLoading && (!allNftsContractData || allNftsContractData.length === 0) ? (
+        <div className="loading-indicator">Fetching NFTs from the blockchain...</div>
+      ) : errorAllNFTs ? (
+        <div className="error-message-market">Error loading NFTs: {errorAllNFTs.shortMessage || errorAllNFTs.message}</div>
       ) : (
         <>
           <AnimatedSection title="Latest Additions">
-            {renderNftList(latestNfts, "Latest NFTs")}
+            {renderNftList(nftsForDisplay, "Latest NFTs")}
           </AnimatedSection>
           <AnimatedSection title="Digital Artwork">
             {renderNftList(artworkNfts, "Artwork NFTs")}
@@ -227,6 +290,6 @@ export default function Marketplace() {
           </AnimatedSection>
         </>
       )}
-    </main> 
+    </main>
   );
 }
