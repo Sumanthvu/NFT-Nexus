@@ -131,10 +131,9 @@ export default function Navbar() {
                             </Link>
                         )
                     })}
-                    {/* Optional: Connect Wallet Button (Mobile) */}
-                    {/* <button className="w-full text-left block mt-3 px-4 py-3 rounded-md text-base font-semibold bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow transition-all duration-200 ease-in-out">
-                        Connect Wallet
-                    </button> */}
+                    <div className="ml-6">
+                            <ConnectButton />
+                        </div>
                 </div>
             </div>
         </nav>

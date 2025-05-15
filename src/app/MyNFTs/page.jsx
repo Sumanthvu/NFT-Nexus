@@ -85,7 +85,14 @@ export default function ProfilePage() {
     }
   }, [fetchedListingFee, listingFeeError]);
 
-
+  useEffect(() => {
+    console.log("ProfilePage Mount/Update: isConnected:", isConnected, "userAddress:", userAddress);
+    if (isConnected && userAddress) {
+      console.log("ProfilePage: Conditions met, attempting to refetch NFTs.");
+      refetchMyNFTs(); // You can try explicitly refetching once conditions are met
+    }
+  }, [isConnected, userAddress, refetchMyNFTs]); // Add refetchMyNFTs to dependencies
+  
   // --- Listing NFT Logic ---
   const {
     data: listTxData,
