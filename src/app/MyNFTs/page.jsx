@@ -6,7 +6,7 @@ import { ethers } from "ethers";
 import { motion } from 'framer-motion'; // Import motion from framer-motion
 import NFTMarketplace from "../../contract_data/NFTMarketplace.json";
 import "./MyNFTs.css";
-import Navbar from "../../components/Navbar"; // Import Navbar component
+
 const contractAddress = "0x13b8718898f70eF57424295b1b6A1eae3F5a0238";
 
 const shortenAddress = (address) => {
@@ -238,17 +238,7 @@ export default function ProfilePage() {
   return (
     <>
     <div className="profile-page">
-      <video
-        ref={videoRef}
-        className="background-video"
-        autoPlay
-        loop
-        muted
-        playsInline
-        src="/profile-background.mp4" // Ensure this path is correct
-      />
-      {/* Optional: Add an overlay div for better contrast if needed */}
-      {/* <div className="video-overlay"></div> */}
+      
 
       <div className="content">
         {/* Attach Spotlight Handlers and Ref to the header */}

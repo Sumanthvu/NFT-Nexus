@@ -31,9 +31,9 @@ export default function Navbar() {
         <nav className="bg-black backdrop-blur-lg shadow-lg sticky  top-0 z-50 border-b border-gray-700/50">
         {/* --- End Updated Styling --- */}
             <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8"> {/* Wider container */}
-                <div className="flex items-center justify-between h-16">
+                <div className="flex items-center justify-around h-16">
                     {/* Logo and Site Name */}
-                    <div className="flex items-center">
+                    <div className="flex items-left">
                         <Link href="/" className="flex items-center space-x-2 group" title="Home">
                             <Logo />
                             <span className="font-bold text-xl text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400 group-hover:opacity-80 transition-opacity duration-300">
@@ -44,7 +44,7 @@ export default function Navbar() {
 
                     {/* Desktop Navigation Links */}
                     <div className="hidden md:flex items-center space-x-2"> {/* Reduced space */}
-                        {navItems.map((item) => {
+                        {navItems.map((item) => {   
                              const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href)); // Basic active check
                              return (
                                 <Link
@@ -66,9 +66,9 @@ export default function Navbar() {
                              )
                         })}
                         {/* Optional: Connect Wallet Button - Styled to match */}
-                        {/* <button className="ml-4 px-4 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 ease-in-out">
+                        <button className="ml-6 px-4 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 ease-in-out">
                             Connect Wallet
-                        </button> */}
+                        </button>
                     </div>
 
                     {/* Mobile Menu Button */}

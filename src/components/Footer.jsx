@@ -1,11 +1,8 @@
-// components/MegaFooter.js
+
 import Link from 'next/link';
-// Import desired icons from react-icons
 import { FaTwitter, FaDiscord, FaGithub } from 'react-icons/fa';
 
-// --- Helper Components ---
 
-// Social Icon Wrapper
 const SocialIcon = ({ children, href, label }) => (
     <a
         href={href || '#'}
@@ -48,7 +45,7 @@ export default function MegaFooter() {
 
     return (
         // Increased padding, darker background
-        <footer className="bg-slate-950 text-gray-400 py-20 sm:py-28 lg:py-32">
+        <footer className="bg-slate-950 h-180 text-gray-400 py-20 sm:py-28 lg:py-32">
             <div className="max-w-7xl mx-auto px-6 lg:px-8">
                 {/* Wider grid layout for more content */}
                 <div className="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-4 lg:gap-x-12 xl:gap-x-16 mb-16 sm:mb-20 lg:mb-24">

@@ -98,7 +98,7 @@ export default function HomePage() {
         // Apply default font to the main container if not using global CSS
         // className="flex flex-col min-h-screen font-roboto ... "
         <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-950 text-gray-800 dark:text-gray-200">
-          <Navbar />
+          {/* <Navbar /> */}
 
             <main className="flex-grow">
                 {/* Hero Section */}
@@ -191,7 +191,7 @@ export default function HomePage() {
 
             </main>
 
-            <Footer />
+            {/* <Footer /> */}
         </div>
     );
 }
