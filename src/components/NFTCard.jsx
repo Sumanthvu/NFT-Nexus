@@ -4,85 +4,87 @@
 import { useEffect, useState } from 'react';
 import { useReadContract } from 'wagmi';
 import { formatEther } from 'viem';
-import NFTMarketplace from "../contract_data/NFTMarketplace.json"; // Adjust path as needed
-import "./NFTCard.css"; // Create this CSS file for NFTCard specific styles if any
+import NFTMarketplace from "../contract_data/NFTMarketplace.json"; // Adjust path
+import "./NFTCard.css";
 
-const CONTRACT_ADDRESS = "0x13b8718898f70eF57424295b1b6A1eae3F5a0238"; // Your contract address
+const CONTRACT_ADDRESS = "0x13b8718898f70eF57424295b1b6A1eae3F5a0238";
 const CONTRACT_ABI = NFTMarketplace.abi;
 
-const NFT_CATEGORIES = ["Artwork", "Video", "GIF"]; // Matches your contract enum order
+const NFT_CATEGORIES = ["Artwork", "Video", "GIF"];
 
 function NFTCard({ initialNftData, onListNFT, isListingThisToken, isProcessingListing }) {
   const [metadata, setMetadata] = useState(null);
   const [metadataError, setMetadataError] = useState('');
-  const [isLoadingMetadataAndURI, setIsLoadingMetadataAndURI] = useState(true);
+  const [isLoadingCardData, setIsLoadingCardData] = useState(true); // Unified loading state for URI and metadata
 
-  const tokenId = initialNftData.tokenId; // This is a BigInt from wagmi, convert to number if needed for display/logic
+  const tokenId = initialNftData.tokenId;
 
-  // 1. Fetch tokenURI for this specific tokenId
-  const { data: tokenURI, error: tokenURIError } = useReadContract({
+  const { data: tokenURI, error: tokenURIError, isLoading: isLoadingTokenURI } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
-    functionName: 'tokenURI', // From ERC721URIStorage
+    functionName: 'tokenURI',
     args: [tokenId],
-    enabled: !!tokenId,
+    enabled: !!tokenId, // TokenId must be present
   });
 
-  // 2. Fetch metadata from IPFS once tokenURI is available
   useEffect(() => {
+    // This effect handles fetching metadata once tokenURI is available
+    if (isLoadingTokenURI) {
+        setIsLoadingCardData(true); // Still loading if URI is loading
+        return;
+    }
+
     if (tokenURIError) {
       console.error(`NFTCard (TokenID: ${Number(tokenId)}): Error fetching tokenURI:`, tokenURIError);
       setMetadataError(`Failed to fetch URI: ${tokenURIError.shortMessage || tokenURIError.message}`);
-      setIsLoadingMetadataAndURI(false);
+      setIsLoadingCardData(false);
       return;
     }
 
     if (tokenURI) {
       console.log(`NFTCard (TokenID: ${Number(tokenId)}): Fetched tokenURI: ${tokenURI}`);
       const fetchMetadata = async () => {
-        setIsLoadingMetadataAndURI(true); // Start loading metadata
+        setIsLoadingCardData(true); // Set loading true for metadata fetch
         setMetadataError('');
         let gatewayUrl = tokenURI;
 
         if (tokenURI.startsWith('ipfs://')) {
           gatewayUrl = `https://gateway.pinata.cloud/ipfs/${tokenURI.split('ipfs://')[1]}`;
         } else if (!tokenURI.startsWith('http://') && !tokenURI.startsWith('https://')) {
-          console.warn(`NFTCard (TokenID: ${Number(tokenId)}): Invalid tokenURI format: ${tokenURI}`);
           setMetadataError("Invalid metadata URL format.");
-          setIsLoadingMetadataAndURI(false);
+          setIsLoadingCardData(false);
           return;
         }
-        console.log(`NFTCard (TokenID: ${Number(tokenId)}): Attempting to fetch metadata from: ${gatewayUrl}`);
 
         try {
-          const response = await fetch(gatewayUrl, { signal: AbortSignal.timeout(20000) }); // 20s timeout
+          const response = await fetch(gatewayUrl, { signal: AbortSignal.timeout(20000) });
           if (!response.ok) {
             const errorText = await response.text();
-            console.error(`NFTCard (TokenID: ${Number(tokenId)}): Failed to fetch metadata. Status: ${response.status}. URL: ${gatewayUrl}. Response: ${errorText.substring(0, 100)}`);
-            throw new Error(`Failed. Status: ${response.status}`);
+            throw new Error(`Failed. Status: ${response.status}. Gateway: ${gatewayUrl.substring(0,30)}...`);
           }
           const fetchedMeta = await response.json();
-          console.log(`NFTCard (TokenID: ${Number(tokenId)}): Fetched metadata JSON:`, fetchedMeta);
-
           if (fetchedMeta.image && fetchedMeta.image.startsWith('ipfs://')) {
             fetchedMeta.image = `https://gateway.pinata.cloud/ipfs/${fetchedMeta.image.split('ipfs://')[1]}`;
           }
           setMetadata(fetchedMeta);
         } catch (err) {
-          console.error(`NFTCard (TokenID: ${Number(tokenId)}): Error fetching/parsing metadata from ${gatewayUrl}:`, err);
+          console.error(`NFTCard (TokenID: ${Number(tokenId)}): Error fetching/parsing metadata:`, err);
           setMetadataError(`Meta Error: ${err.message}`);
         } finally {
-          setIsLoadingMetadataAndURI(false);
+          setIsLoadingCardData(false); // Done loading metadata (success or fail)
         }
       };
       fetchMetadata();
-    } else if (tokenId && !tokenURIError) {
-      // tokenURI might still be loading from useReadContract
-      setIsLoadingMetadataAndURI(true);
+    } else if (tokenId) {
+        // tokenURI is null/undefined but no error and not loading - might be an issue if tokenId is valid
+        // This case should ideally be covered by isLoadingTokenURI or tokenURIError
+        console.warn(`NFTCard (TokenID: ${Number(tokenId)}): tokenURI is unexpectedly null/undefined without error.`);
+        setMetadataError("Could not retrieve token URI.");
+        setIsLoadingCardData(false);
     }
-  }, [tokenURI, tokenId, tokenURIError]);
+  }, [tokenURI, tokenId, tokenURIError, isLoadingTokenURI]);
 
-  if (isLoadingMetadataAndURI) {
+  if (isLoadingCardData) {
     return (
       <div className="nft-card skeleton">
         <div className="image-placeholder skeleton-bg"></div>
@@ -102,7 +104,7 @@ function NFTCard({ initialNftData, onListNFT, isListingThisToken, isProcessingLi
      return (
         <div className="nft-card error-card">
             <div className="image-placeholder">
-                <span role="img" aria-label="Error">⚠️</span>
+                <span role="img" aria-label="Error" style={{fontSize: "2em"}}>⚠️</span>
             </div>
             <div className="nft-info">
                 <h3>NFT #{Number(tokenId)}</h3>
@@ -121,14 +123,12 @@ function NFTCard({ initialNftData, onListNFT, isListingThisToken, isProcessingLi
             src={displayImage}
             alt={displayName}
             onError={(e) => {
-              console.warn(`NFTCard (TokenID: ${Number(tokenId)}): Error loading image: ${displayImage}`);
-              e.target.style.display = 'none'; // Hide broken image
+              e.target.style.display = 'none';
               const placeholder = e.target.parentElement.querySelector('.image-placeholder-content');
-              if (placeholder) placeholder.style.display = 'flex'; // Show text placeholder
+              if (placeholder) placeholder.style.display = 'flex';
             }}
           />
         ) : null}
-        {/* Text placeholder, shown if no image or image fails to load */}
         <div className="image-placeholder-content" style={{ display: displayImage ? 'none' : 'flex' }}>
           {displayName.substring(0, 20)}{displayName.length > 20 ? "..." : ""}
         </div>
@@ -140,7 +140,7 @@ function NFTCard({ initialNftData, onListNFT, isListingThisToken, isProcessingLi
           <p className="listed-status">Listed: {formatEther(initialNftData.price)} ETH</p>
         ) : (
           <button
-            onClick={() => onListNFT(tokenId)} // tokenId from initialNftData
+            onClick={() => onListNFT(tokenId)}
             disabled={isProcessingListing || isListingThisToken}
             className="list-button"
           >
