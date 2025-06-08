@@ -16,7 +16,7 @@
 > The All-in-One Hub for Modern NFT Enthusiasts.
 
 NFT Nexus is a next-generation NFT marketplace built for the decentralized future. We empower users to mint, trade, auction, and even create AI-generated NFTs in one unified platform. Whether you’re an artist, collector, or Web3 enthusiast, NFT Nexus is your portal to the vibrant NFT ecosystem.
-
+Live application:https://nft-nexus-zeta.vercel.app/
 
 ### Take a look at our Featured NFTs
 
